@@ -1,0 +1,2724 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إدارة السلامة والصحة المهنية والتفتيش الميداني - مستشفى الناس للأطفال</title>
+  
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="سلامة مستشفى الناس">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Firebase Realtime Database SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <!-- Direct PDF Generator Library (html2pdf.js) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <style>
+    /* Built-in Core & Fallback Dark Theme Styles */
+    *, ::before, ::after { box-sizing: border-box; font-family: 'Cairo', 'Inter', system-ui, sans-serif; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #020617;
+      color: #f1f5f9;
+      min-height: 100vh;
+      direction: rtl;
+    }
+    .font-inter { font-family: 'Inter', sans-serif; }
+    .hidden { display: none !important; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #0d9488; }
+    .dark-panel {
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(51, 65, 85, 0.75);
+      border-radius: 1rem;
+      padding: 1.25rem;
+    }
+    .card-glass {
+      background: rgba(30, 41, 59, 0.8);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(71, 85, 105, 0.55);
+      border-radius: 0.85rem;
+    }
+    .editable-input {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(71, 85, 105, 0.8);
+      border-radius: 0.5rem;
+      padding: 0.35rem 0.6rem;
+      color: #ffffff;
+      outline: none;
+    }
+    .editable-input:focus {
+      border-color: #14b8a6;
+      box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.25);
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.65rem 0.75rem; text-align: right; }
+    button { cursor: pointer; border: none; }
+    select, input, textarea { color: #fff; background-color: #0f172a; }
+    @media print {
+      html, body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      header, nav, main, #loginOverlay, #toastNotification, .no-print {
+        display: none !important;
+      }
+      #printPreviewModal {
+        position: static !important;
+        display: block !important;
+        background: #ffffff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      #printPreviewModal > div {
+        max-width: 100% !important;
+        max-height: none !important;
+        box-shadow: none !important;
+        border: none !important;
+      }
+      #printPreviewContent {
+        overflow: visible !important;
+        padding: 10px !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-teal-500 selection:text-white">
+
+  <!-- ================= LOGIN OVERLAY SCREEN ================= -->
+  <div id="loginOverlay" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex items-center justify-center p-4 hidden">
+    <div class="dark-panel rounded-3xl w-full max-w-md p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-800 text-center">
+      <div class="w-fit mx-auto px-7 py-3.5 bg-white rounded-2xl shadow-xl flex items-center gap-4 border border-slate-200 min-w-[280px] justify-center" dir="ltr">
+        <svg class="h-12 w-auto shrink-0" viewBox="0 0 150 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="46" height="46" rx="9" fill="#E51A24"/><text x="23" y="34" font-family="'Inter', sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" text-anchor="middle">A</text>
+          <rect x="52" y="0" width="46" height="46" rx="9" fill="#F7941D"/><text x="75" y="34" font-family="'Inter', sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" text-anchor="middle">L</text>
+          <rect x="104" y="0" width="46" height="46" rx="9" fill="#8DC63F"/><path d="M127 15 C122 8, 114 12, 114 19 C114 27, 127 34, 127 34 C127 34, 140 27, 140 19 C140 12, 132 8, 127 15 Z" fill="#FFFFFF"/>
+          <rect x="0" y="52" width="46" height="46" rx="9" fill="#8DC63F"/><text x="23" y="86" font-family="'Inter', sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" text-anchor="middle">N</text>
+          <rect x="52" y="52" width="46" height="46" rx="9" fill="#0094D8"/><text x="75" y="86" font-family="'Inter', sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" text-anchor="middle">A</text>
+          <rect x="104" y="52" width="46" height="46" rx="9" fill="#582C83"/><text x="127" y="86" font-family="'Inter', sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" text-anchor="middle">S</text>
+        </svg>
+        <div class="flex flex-col text-left leading-tight shrink-0 select-none whitespace-nowrap">
+          <span class="text-base font-black tracking-tight text-slate-800 font-sans">Al Nas Hospital</span>
+          <span class="text-xs font-black text-slate-700 mt-0.5">مستشفى الناس</span>
+        </div>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-black text-white">تسجيل الدخول للنظام الميداني</h2>
+        <p class="text-xs text-slate-400 mt-1">إدارة السلامة والصحة المهنية والبيئة (OHS Dept)</p>
+      </div>
+
+      <div class="space-y-4 text-right text-xs">
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">اختر المستخدم / المفتش:</label>
+          <select id="loginUserSelect" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-xs font-bold focus:border-teal-500 outline-none"></select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">كلمة المرور الخاصة بك:</label>
+          <div class="relative">
+            <input type="password" id="loginPasswordInput" placeholder="أدخل كلمة المرور الخاصة بحسابك" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 pl-10 text-white text-xs focus:border-teal-500 outline-none">
+            <button type="button" onclick="togglePasswordVisibility('loginPasswordInput')" class="absolute left-3 top-3 text-slate-400 hover:text-white">👁️</button>
+          </div>
+          <div class="text-[10px] text-teal-400 mt-1">كلمة المرور المبدئية: 123 (يمكن لكل مستخدم تغييرها من رمز الترس ⚙️ لحفظ خصوصيته)</div>
+        </div>
+
+        <button type="button" onclick="handleLoginSubmit()" class="w-full py-3 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white font-black rounded-xl text-xs shadow-lg transition duration-200">
+          دخول النظام 🚀
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TOP HEADER BAR ================= -->
+  <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20 gap-2">
+        <div class="flex items-center gap-3">
+          <div class="bg-white px-4 py-2 rounded-2xl shadow-lg border border-slate-200 flex items-center gap-3 shrink-0" dir="ltr">
+            <svg class="h-10 w-auto shrink-0" viewBox="0 0 150 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0" y="0" width="46" height="46" rx="9" fill="#E51A24"/><text x="23" y="34" font-family="'Inter', sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" text-anchor="middle">A</text>
+              <rect x="52" y="0" width="46" height="46" rx="9" fill="#F7941D"/><text x="75" y="34" font-family="'Inter', sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" text-anchor="middle">L</text>
+              <rect x="104" y="0" width="46" height="46" rx="9" fill="#8DC63F"/><path d="M127 15 C122 8, 114 12, 114 19 C114 27, 127 34, 127 34 C127 34, 140 27, 140 19 C140 12, 132 8, 127 15 Z" fill="#FFFFFF"/>
+              <rect x="0" y="52" width="46" height="46" rx="9" fill="#8DC63F"/><text x="23" y="86" font-family="'Inter', sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" text-anchor="middle">N</text>
+              <rect x="52" y="52" width="46" height="46" rx="9" fill="#0094D8"/><text x="75" y="86" font-family="'Inter', sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" text-anchor="middle">A</text>
+              <rect x="104" y="52" width="46" height="46" rx="9" fill="#582C83"/><text x="127" y="86" font-family="'Inter', sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" text-anchor="middle">S</text>
+            </svg>
+            <div class="flex flex-col text-left leading-tight shrink-0 select-none whitespace-nowrap">
+              <span class="text-sm font-black tracking-tight text-slate-800 font-sans">Al Nas Hospital</span>
+              <span class="text-xs font-black text-slate-700 mt-0.5">مستشفى الناس</span>
+            </div>
+          </div>
+          <div class="hidden md:flex flex-col justify-center pr-3 border-r border-slate-700/80 text-right">
+            <h1 class="text-sm font-extrabold text-teal-400 tracking-tight leading-snug">نظام السلامة والصحة المهنية</h1>
+            <p class="text-[10px] text-slate-300 font-medium leading-tight mt-0.5">إدارة السلامة والصحة المهنية والبيئة (OHS & Environment)</p>
+          </div>
+        </div>
+
+        <!-- Center: Cairo Live Clock & Shift -->
+        <div class="hidden lg:flex flex-col items-center justify-center bg-slate-800/80 px-4 py-1.5 rounded-xl border border-slate-700/80">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span id="cairoTimeLive" class="text-xs font-mono font-bold text-teal-300">00:00:00</span>
+            <span class="text-[10px] text-slate-400">توقيت مصر 🇪🇬</span>
+          </div>
+          <div class="flex items-center gap-2 mt-0.5">
+            <span id="cairoDateLive" class="text-[11px] text-slate-300 font-semibold">جاري التحديث...</span>
+            <span id="currentActiveShiftBadge" class="text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">☀️ الشفت الصباحي (08:00 AM - 08:00 PM)</span>
+          </div>
+        </div>
+
+        <!-- Left: Quick Actions -->
+        <div class="flex items-center gap-2">
+          <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-800/90 border border-teal-500/30 text-[10px] font-bold text-teal-300">
+            <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span id="syncStatusText">Firebase متصل 🟢</span>
+          </div>
+          <button onclick="commitAndSaveAllChangesToApp()" class="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-emerald-500 text-white font-extrabold rounded-xl border border-emerald-400/40 text-xs transition flex items-center gap-1.5 shadow-lg">
+            <span>💾 حفظ وتثبيت سحابي</span>
+          </button>
+          <button onclick="switchTab('reportsCenterTab')" class="px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-md flex items-center gap-1.5 text-xs transition border border-cyan-400/30">
+            <span>🖨️ مركز التقارير</span>
+          </button>
+          
+          <div class="flex items-center gap-2 bg-slate-800/90 pl-3 pr-2 py-1.5 rounded-xl border border-slate-700">
+            <div class="w-7 h-7 rounded-lg bg-teal-600 flex items-center justify-center text-white font-bold text-xs" id="userAvatarChar">ع</div>
+            <div class="text-right">
+              <div id="loggedUserName" class="text-xs font-bold text-slate-200">م/ عمر فريد العزب</div>
+              <div id="loggedUserRoleBadge" class="text-[10px] text-teal-400 font-semibold">Owner / صلاحية كاملة 👑</div>
+            </div>
+            <button onclick="openPasswordChangeModal()" title="تغيير كلمة المرور الخاصة" class="text-slate-400 hover:text-teal-300 p-1">⚙️</button>
+            <button onclick="handleUserLogout()" title="تبديل الحساب / تسجيل الخروج" class="text-rose-400 hover:text-rose-300 p-1 mr-1">🚪</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= TABS NAVIGATION ================= -->
+  <nav class="bg-slate-900 border-b border-slate-800 px-4">
+    <div class="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto py-2.5">
+      <button onclick="switchTab('weeklyScheduleTab')" id="tabBtn_weeklyScheduleTab" class="nav-tab px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 bg-teal-600 text-white shadow-lg"><span>📅 جدول المرور الأسبوعي</span></button>
+      <button onclick="switchTab('unifiedPlanTab')" id="tabBtn_unifiedPlanTab" class="nav-tab px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 text-slate-400 hover:text-slate-200 hover:bg-slate-800"><span>🗂️ الخطة المجمعة (فحص + دريلات + تدريب)</span></button>
+      <button onclick="switchTab('checklistsTab')" id="tabBtn_checklistsTab" class="nav-tab px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 text-slate-400 hover:text-slate-200 hover:bg-slate-800"><span>📋 قوائم الفحص الميداني (36 موقعاً)</span></button>
+      <button onclick="switchTab('activitiesTab')" id="tabBtn_activitiesTab" class="nav-tab px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 text-slate-400 hover:text-slate-200 hover:bg-slate-800"><span>🚨 أكواد الطوارئ والدريلات</span></button>
+      <button onclick="switchTab('ncrTab')" id="tabBtn_ncrTab" class="nav-tab px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 text-slate-400 hover:text-slate-200 hover:bg-slate-800"><span>⚠️ سجل عدم المطابقة (NCR)</span></button>
+      <button onclick="switchTab('incidentsTab')" id="tabBtn_incidentsTab" class="nav-tab px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 text-slate-400 hover:text-slate-200 hover:bg-slate-800"><span>🩹 سجل الحوادث والإصابات</span></button>
+      <button onclick="switchTab('kpisTab')" id="tabBtn_kpisTab" class="nav-tab px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 text-slate-400 hover:text-slate-200 hover:bg-slate-800"><span>📊 مصفوفة تقييم المفتشين (KPIs)</span></button>
+      <button onclick="switchTab('reportsCenterTab')" id="tabBtn_reportsCenterTab" class="nav-tab px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 text-slate-400 hover:text-slate-200 hover:bg-slate-800"><span>🖨️ التقارير والطباعة</span></button>
+      <button onclick="switchTab('teamTab')" id="tabBtn_teamTab" class="nav-tab px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 text-slate-400 hover:text-slate-200 hover:bg-slate-800"><span>👥 فريق العمل</span></button>
+    </div>
+  </nav>
+
+  <!-- ================= MAIN CONTAINER ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+    <!-- Tab 1: Weekly Schedule -->
+    <section id="weeklyScheduleTab" class="tab-content space-y-4">
+      <div class="dark-panel rounded-2xl p-5 shadow-2xl border border-slate-800">
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-700/80">
+          <div>
+            <h2 class="text-base font-black text-white">جدول خطة المرور والتفتيش الميداني الأسبوعي</h2>
+            <p class="text-xs text-slate-400 mt-1">توزيع مواقع الفحص الميداني المعتمدة على الشفتين الصباحي (08:00 AM - 08:00 PM) والمسائي (08:00 PM - 08:00 AM)</p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button id="btnAddScheduleDay" onclick="addNewDayToSchedule()" class="owner-only px-3 py-1.5 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-xs font-bold">➕ إضافة يوم جديد</button>
+            <button onclick="generateAndOpenReportPreview('weekly')" class="px-3 py-1.5 bg-cyan-700 hover:bg-cyan-600 text-white rounded-lg text-xs font-bold">🖨️ طباعة خطة الأسبوع</button>
+            <button onclick="exportScheduleToCsv()" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold">📊 تصدير Excel</button>
+          </div>
+        </div>
+        <div id="weeklyScheduleContainer" class="mt-4 space-y-4"></div>
+      </div>
+    </section>
+
+    <!-- Tab 1.5: UNIFIED WEEKLY PLAN (INSPECTIONS + DRILLS + TRAINING) -->
+    <section id="unifiedPlanTab" class="tab-content hidden space-y-4">
+      <div class="dark-panel rounded-2xl p-5 shadow-2xl border border-slate-800 space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-700/80">
+          <div>
+            <h2 class="text-base font-black text-white">🗂️ الخطة التنفيذية المجمعة (قوائم الفحص + الدريلات + التدريب الميداني)</h2>
+            <p class="text-xs text-slate-400 mt-1">عرض شامل ومجمع لكافة مهام الأسبوع من جولات التفتيش الميداني، تجارب الطوارئ (Drills)، وبرامج التدريب المطلوبة</p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="openTrainingModal()" class="owner-only px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold">➕ إضافة تدريب ميداني جديد</button>
+            <button onclick="generateAndOpenReportPreview('unified_plan_report')" class="px-3.5 py-1.5 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white rounded-lg text-xs font-bold shadow">🖨️ طباعة الخطة المجمعة</button>
+          </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="card-glass p-4 rounded-2xl border border-teal-500/30">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-black text-teal-300">📋 إجمالي مواقع الفحص الأسبوعية</span>
+              <span id="unifiedCountInspections" class="text-lg font-black text-white">0</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-1">موزعة على مدار الأسبوع في الشفتين الصباحي والمسائي</p>
+          </div>
+          <div class="card-glass p-4 rounded-2xl border border-rose-500/30">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-black text-rose-300">🚨 أكواد الطوارئ والدريلات</span>
+              <span id="unifiedCountDrills" class="text-lg font-black text-white">0</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-1">تجارب الطوارئ والإخلاء المجدولة والمنفذة</p>
+          </div>
+          <div class="card-glass p-4 rounded-2xl border border-indigo-500/30">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-black text-indigo-300">🎓 التدريبات الميدانية المطلوبة</span>
+              <span id="unifiedCountTrainings" class="text-lg font-black text-white">0</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-1">برامج التوعية والتدريب على رأس العمل (OJT)</p>
+          </div>
+        </div>
+
+        <!-- Section A: Consolidated Inspections -->
+        <div class="space-y-2">
+          <h3 class="text-xs font-black text-teal-400">أولاً: ملخص جولات الفحص الميداني الأسبوعية</h3>
+          <div id="unifiedInspectionsSummary" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+        </div>
+
+        <!-- Section B: Consolidated Drills -->
+        <div class="space-y-2 pt-3 border-t border-slate-800">
+          <h3 class="text-xs font-black text-rose-400">ثانياً: خطة أكواد الطوارئ والدريلات (Drills)</h3>
+          <div id="unifiedDrillsSummary" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+        </div>
+
+        <!-- Section C: Consolidated Trainings -->
+        <div class="space-y-2 pt-3 border-t border-slate-800">
+          <h3 class="text-xs font-black text-indigo-400">ثالثاً: خطة التدريبات الميدانية المطلوبة (Safety Trainings)</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-right text-xs">
+              <thead>
+                <tr class="bg-slate-800 text-slate-300 border-b border-slate-700">
+                  <th class="p-3 font-bold">موضوع التدريب</th>
+                  <th class="p-3 font-bold">القسم المستهدف</th>
+                  <th class="p-3 font-bold">المدرب / المسؤول</th>
+                  <th class="p-3 font-bold">عدد المتدربين</th>
+                  <th class="p-3 font-bold">التاريخ</th>
+                  <th class="p-3 font-bold">الحالة</th>
+                  <th class="p-3 font-bold text-center">إجراء</th>
+                </tr>
+              </thead>
+              <tbody id="trainingsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 2: Checklists (36 English Departments) -->
+    <section id="checklistsTab" class="tab-content hidden space-y-4">
+      <div class="dark-panel rounded-2xl p-5 shadow-2xl border border-slate-800">
+        <div class="flex flex-wrap items-center justify-between pb-3 border-b border-slate-800 gap-2">
+          <div>
+            <h2 class="text-base font-black text-white">قوائم الفحص الميداني التخصصية (36 موقعاً معتمداً)</h2>
+            <p class="text-xs text-slate-400 mt-1">اختر القسم لبدء التفتيش الميداني، وتُسجل النتائج أوتوماتيكياً في مؤشرات أداء المفتش (KPIs)</p>
+          </div>
+          <div class="flex items-center gap-2 owner-only">
+            <button onclick="openEditChecklistQuestionsModal()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold">⚙️ إدارة بنود الفحص</button>
+            <button onclick="openAddDepartmentModal()" class="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-xs font-bold">➕ إضافة موقع جديد</button>
+          </div>
+        </div>
+        <div id="checklistsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-4"></div>
+      </div>
+    </section>
+
+    <!-- Tab 3: Activities & Drills -->
+    <section id="activitiesTab" class="tab-content hidden space-y-4">
+      <div class="dark-panel rounded-2xl p-5 shadow-2xl border border-slate-800">
+        <div class="flex flex-wrap items-center justify-between pb-3 border-b border-slate-800 gap-2">
+          <div>
+            <h2 class="text-base font-black text-white">الخطة الشهرية لأكواد الطوارئ والدريلات الميدانية</h2>
+            <p class="text-xs text-slate-400 mt-1">متابعة تنفيذ تجارب الطوارئ والإخلاء وربط الإنجاز بمصفوفة تقييم المفتشين</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="generateAndOpenReportPreview('drills_report')" class="px-3 py-1.5 bg-cyan-700 hover:bg-cyan-600 text-white rounded-lg text-xs font-bold">🖨️ طباعة تقرير الدريلات</button>
+            <button onclick="openDrillModal()" class="owner-only px-3.5 py-1.5 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-xs font-bold">➕ إضافة دريل جديد</button>
+          </div>
+        </div>
+        <div class="overflow-x-auto mt-4">
+          <table class="w-full text-right text-xs">
+            <thead>
+              <tr class="bg-slate-800 text-slate-300 border-b border-slate-700">
+                <th class="p-3 font-bold">الكود / نوع الطوارئ</th>
+                <th class="p-3 font-bold">القسم المستهدف</th>
+                <th class="p-3 font-bold">المكلف بالتنفيذ</th>
+                <th class="p-3 font-bold">التاريخ المحدد</th>
+                <th class="p-3 font-bold">الحالة</th>
+                <th class="p-3 font-bold text-center">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="activitiesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 4: NCR Tracker -->
+    <section id="ncrTab" class="tab-content hidden space-y-4">
+      <div class="dark-panel rounded-2xl p-5 shadow-2xl border border-slate-800">
+        <div class="flex flex-wrap items-center justify-between pb-3 border-b border-slate-800 gap-2">
+          <div>
+            <h2 class="text-base font-black text-white">سجل تقارير عدم المطابقة والملاحظات الميدانية (NCRs Tracker)</h2>
+            <p class="text-xs text-slate-400 mt-1">توثيق المخالفات الميدانية والصور الفوتوغرافية ومتابعة إغلاقها</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="generateAndOpenReportPreview('ncr_report')" class="px-3 py-1.5 bg-cyan-700 hover:bg-cyan-600 text-white rounded-lg text-xs font-bold">🖨️ طباعة سجل الـ NCRs</button>
+            <button onclick="openNcrModal(-1)" class="px-3.5 py-1.5 bg-rose-700 hover:bg-rose-600 text-white rounded-lg text-xs font-bold">➕ رصد ملاحظة NCR جديدة</button>
+          </div>
+        </div>
+        <div class="overflow-x-auto mt-4">
+          <table class="w-full text-right text-xs">
+            <thead>
+              <tr class="bg-slate-800 text-slate-300 border-b border-slate-700">
+                <th class="p-3 font-bold">رقم NCR</th>
+                <th class="p-3 font-bold">القسم</th>
+                <th class="p-3 font-bold">الملاحظة والوصف</th>
+                <th class="p-3 font-bold">الصورة</th>
+                <th class="p-3 font-bold">مستوى الخطورة</th>
+                <th class="p-3 font-bold">المسؤول عن المتابعة</th>
+                <th class="p-3 font-bold">المهلة</th>
+                <th class="p-3 font-bold">الحالة</th>
+                <th class="p-3 font-bold text-center">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="ncrTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 5: Incidents Log -->
+    <section id="incidentsTab" class="tab-content hidden space-y-4">
+      <div class="dark-panel rounded-2xl p-5 shadow-2xl border border-slate-800">
+        <div class="flex flex-wrap items-center justify-between pb-3 border-b border-slate-800 gap-2">
+          <div>
+            <h2 class="text-base font-black text-white">سجل حوادث وإصابات بيئة العمل (Zero Accidents Log)</h2>
+            <p class="text-xs text-slate-400 mt-1">توثيق الحوادث والإصابات المهنية والصور المرفقة وأيام الغياب</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="generateAndOpenReportPreview('incidents_report')" class="px-3 py-1.5 bg-cyan-700 hover:bg-cyan-600 text-white rounded-lg text-xs font-bold">🖨️ طباعة سجل الحوادث</button>
+            <button onclick="openIncidentModal(-1)" class="px-3.5 py-1.5 bg-amber-700 hover:bg-amber-600 text-white rounded-lg text-xs font-bold">➕ تسجيل حادث / إصابة عمل</button>
+          </div>
+        </div>
+        <div class="overflow-x-auto mt-4">
+          <table class="w-full text-right text-xs">
+            <thead>
+              <tr class="bg-slate-800 text-slate-300 border-b border-slate-700">
+                <th class="p-3 font-bold">رقم الحادث</th>
+                <th class="p-3 font-bold">التاريخ والوقت</th>
+                <th class="p-3 font-bold">المصاب / الإدارة</th>
+                <th class="p-3 font-bold">نوع الإصابة والتشخيص</th>
+                <th class="p-3 font-bold">الموقع</th>
+                <th class="p-3 font-bold">الصورة</th>
+                <th class="p-3 font-bold text-center">أيام الغياب</th>
+                <th class="p-3 font-bold text-center">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="incidentsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 6: KPIs Matrix -->
+    <section id="kpisTab" class="tab-content hidden space-y-4">
+      <div class="dark-panel rounded-2xl p-5 shadow-2xl border border-slate-800">
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800">
+          <div>
+            <h2 class="text-base font-black text-white">مصفوفة تقييم مؤشرات أداء المفتشين (KPIs)</h2>
+            <p class="text-xs text-slate-400 mt-1">ترتبط تلقائياً بنتائج الفحص الميداني، إغلاق الـ NCRs، وتنفيذ الدريلات والتدريبات لكل مفتش</p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="openMemberModal(-1)" class="owner-only px-3 py-1.5 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-xs font-bold">➕ إضافة مفتش جديد</button>
+            <button onclick="generateAndOpenReportPreview('individual')" class="px-3 py-1.5 bg-amber-700 hover:bg-amber-600 text-white rounded-lg text-xs font-bold">🖨️ طباعة كشف الـ KPIs والتقييم</button>
+            <button onclick="resetAllKpisToZero()" class="owner-only px-3 py-1.5 bg-rose-900/60 hover:bg-rose-800 text-rose-200 border border-rose-700 rounded-lg text-xs font-bold">🔄 تصفير المؤشرات</button>
+          </div>
+        </div>
+        <div class="overflow-x-auto mt-4">
+          <table class="w-full text-right text-xs">
+            <thead>
+              <tr class="bg-slate-800 text-slate-300 border-b border-slate-700">
+                <th class="p-3 font-bold text-center">م</th>
+                <th class="p-3 font-bold">اسم المفتش</th>
+                <th class="p-3 font-bold">الوظيفة</th>
+                <th class="p-3 font-bold text-center">جولات الفحص المنفذة</th>
+                <th class="p-3 font-bold text-center">NCRs مغلقة</th>
+                <th class="p-3 font-bold text-center">دريلات وتدريب</th>
+                <th class="p-3 font-bold text-center">نسبة الامتثال</th>
+                <th class="p-3 font-bold text-center">التقدير العام</th>
+                <th class="p-3 font-bold text-center owner-only">التحكم</th>
+              </tr>
+            </thead>
+            <tbody id="kpisTableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- Recent Field Inspections Log linked to KPIs -->
+        <div class="mt-6 pt-4 border-t border-slate-800">
+          <h3 class="text-xs font-black text-teal-400 mb-3">📋 سجل نتائج الفحوصات الميدانية المنفذة والمرتبطة بالـ KPIs</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-right text-xs">
+              <thead>
+                <tr class="bg-slate-800/70 text-slate-300 border-b border-slate-700">
+                  <th class="p-2.5 font-bold">التاريخ والوقت</th>
+                  <th class="p-2.5 font-bold">الموقع / القسم</th>
+                  <th class="p-2.5 font-bold">المفتش المنفذ</th>
+                  <th class="p-2.5 font-bold text-center">نسبة الامتثال</th>
+                  <th class="p-2.5 font-bold text-center">ملاحظات مرصودة</th>
+                </tr>
+              </thead>
+              <tbody id="inspectionLogsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 6.5: REPORTS CENTER TAB -->
+    <section id="reportsCenterTab" class="tab-content hidden space-y-4">
+      <div class="dark-panel rounded-2xl p-5 shadow-2xl border border-slate-800 space-y-5">
+        <div class="pb-3 border-b border-slate-800">
+          <h2 class="text-base font-black text-white">🖨️ مركز التقارير الرسمية المعتمدة (المنفصلة والتقرير الشامل المجمع)</h2>
+          <p class="text-xs text-slate-400 mt-1">اختر أي تقرير لطباعته بشكل مستقل لوحده، أو اختر التقرير الشامل المجمع في الأسفل لطباعة كافة أعمال القسم بالتوقيعات الرباعية</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+          <div class="card-glass p-4 rounded-2xl border border-slate-700 hover:border-teal-500 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-lg">📅</span>
+                <span class="px-2 py-0.5 rounded bg-teal-500/20 text-teal-300 text-[10px] font-bold">تقرير مستقل</span>
+              </div>
+              <h3 class="font-black text-white text-sm">تقرير جدول المرور الأسبوعي</h3>
+              <p class="text-slate-400 text-[11px] mt-1">طباعة جدول توزيع الورديات الصباحية والمسائية ومواقع الفحص الـ 36</p>
+            </div>
+            <button onclick="generateAndOpenReportPreview('weekly')" class="mt-4 w-full py-2 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl shadow transition">🖨️ معاينة وطباعة التقرير</button>
+          </div>
+
+          <div class="card-glass p-4 rounded-2xl border border-slate-700 hover:border-cyan-500 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-lg">🗂️</span>
+                <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-bold">تقرير مجمع للخطة</span>
+              </div>
+              <h3 class="font-black text-white text-sm">تقرير الخطة المجمعة (فحص + دريلات + تدريب)</h3>
+              <p class="text-slate-400 text-[11px] mt-1">يشمل قوائم الفحص الميداني المنفذة، الدريلات، والتدريبات المطلوبة معاً</p>
+            </div>
+            <button onclick="generateAndOpenReportPreview('unified_plan_report')" class="mt-4 w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl shadow transition">🖨️ معاينة وطباعة التقرير</button>
+          </div>
+
+          <div class="card-glass p-4 rounded-2xl border border-slate-700 hover:border-emerald-500 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-lg">📊</span>
+                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">تقرير مستقل</span>
+              </div>
+              <h3 class="font-black text-white text-sm">تقرير مصفوفة الـ KPIs ونتائج الفحص</h3>
+              <p class="text-slate-400 text-[11px] mt-1">يوضح إنجاز كل مفتش ونتائج فحوصاته الميدانية ونسبة امتثاله الفعلية</p>
+            </div>
+            <button onclick="generateAndOpenReportPreview('individual')" class="mt-4 w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow transition">🖨️ معاينة وطباعة التقرير</button>
+          </div>
+
+          <div class="card-glass p-4 rounded-2xl border border-slate-700 hover:border-rose-500 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-lg">⚠️</span>
+                <span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[10px] font-bold">تقرير مستقل</span>
+              </div>
+              <h3 class="font-black text-white text-sm">تقرير سجل عدم المطابقة (NCRs)</h3>
+              <p class="text-slate-400 text-[11px] mt-1">كشف مستقل بجميع حالات عدم المطابقة والصور المرفقة وحالة الإغلاق</p>
+            </div>
+            <button onclick="generateAndOpenReportPreview('ncr_report')" class="mt-4 w-full py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl shadow transition">🖨️ معاينة وطباعة التقرير</button>
+          </div>
+
+          <div class="card-glass p-4 rounded-2xl border border-slate-700 hover:border-amber-500 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-lg">🩹</span>
+                <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold">تقرير مستقل</span>
+              </div>
+              <h3 class="font-black text-white text-sm">تقرير سجل الحوادث والإصابات</h3>
+              <p class="text-slate-400 text-[11px] mt-1">كشف مستقل بتوثيق إصابات العمل أو شهادة خلو المستشفى من الحوادث</p>
+            </div>
+            <button onclick="generateAndOpenReportPreview('incidents_report')" class="mt-4 w-full py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl shadow transition">🖨️ معاينة وطباعة التقرير</button>
+          </div>
+
+          <div class="card-glass p-4 rounded-2xl border border-slate-700 hover:border-indigo-500 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-lg">🚨</span>
+                <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px] font-bold">تقرير مستقل</span>
+              </div>
+              <h3 class="font-black text-white text-sm">تقرير أكواد الطوارئ والدريلات والتدريب</h3>
+              <p class="text-slate-400 text-[11px] mt-1">كشف مستقل بخطة الدريلات والتدريبات الميدانية المنفذة والمجدولة</p>
+            </div>
+            <button onclick="generateAndOpenReportPreview('drills_report')" class="mt-4 w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow transition">🖨️ معاينة وطباعة التقرير</button>
+          </div>
+        </div>
+
+        <!-- Master Comprehensive Report Banner -->
+        <div class="p-5 rounded-2xl bg-gradient-to-r from-teal-950 via-slate-900 to-amber-950 border-2 border-amber-500/50 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+          <div>
+            <span class="px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black text-[10px]">التقرير الرسمي المجمع ⭐</span>
+            <h3 class="text-base font-black text-white mt-1">🏛️ التقرير التنفيذي الشامل العام لإدارة السلامة والصحة المهنية (Master Report)</h3>
+            <p class="text-xs text-slate-300 mt-0.5">يجمع كافة الجداول: جدول المرور، نتائج الفحص، مصفوفة الـ KPIs، سجل الـ NCRs، سجل الحوادث، والدريلات والتدريب في وثيقة واحدة معتمدة</p>
+          </div>
+          <button onclick="generateAndOpenReportPreview('master_comprehensive')" class="px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black rounded-xl text-xs shrink-0 shadow-lg transition">
+            🖨️ طباعة التقرير الشامل الكامل
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 7: Team Members -->
+    <section id="teamTab" class="tab-content hidden space-y-4">
+      <div class="dark-panel rounded-2xl p-5 shadow-2xl border border-slate-800">
+        <div class="flex flex-wrap items-center justify-between pb-3 border-b border-slate-800 gap-2">
+          <div>
+            <h2 class="text-base font-black text-white">أعضاء فريق العمل والسلامة والصلاحيات</h2>
+            <p class="text-xs text-slate-400 mt-1">بيانات فريق السلامة والصحة المهنية وربط الحسابات بالسحابة المركزية</p>
+          </div>
+          <button onclick="openMemberModal(-1)" class="owner-only px-3.5 py-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow transition">
+            <span>➕ إضافة عضو جديد للفريق</span>
+          </button>
+        </div>
+        <div id="teamCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= MODALS & POPUPS ================= -->
+
+  <!-- Checklist Modal -->
+  <div id="checklistModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div class="p-4 bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 border-b border-teal-700/50 flex items-center justify-between">
+        <div>
+          <h3 id="checklistModalTitle" class="text-sm font-black text-white">قائمة الفحص الميداني</h3>
+          <p class="text-[11px] text-teal-300">تُسجل نتيجة الفحص مباشرة في سجل المفتش ومصفوفة الـ KPIs</p>
+        </div>
+        <button onclick="closeChecklistModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+      </div>
+      <div class="p-3.5 bg-slate-800/80 border-b border-slate-700 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div><span>المفتش: </span><b id="checklistOfficerName" class="text-teal-300"></b></div>
+        <div class="flex items-center gap-2">
+          <button onclick="addNewQuestionToChecklist()" class="owner-only px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-[11px] font-bold">➕ إضافة بند فحص جديد</button>
+          <span>نسبة الامتثال:</span>
+          <span id="checklistScoreBadge" class="px-3 py-1 rounded-full font-black text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">100%</span>
+        </div>
+      </div>
+      <div id="checklistItemsContainer" class="p-5 space-y-3 overflow-y-auto flex-1"></div>
+      <div class="p-4 bg-slate-800/90 border-t border-slate-700 flex items-center justify-between">
+        <span class="text-[11px] text-slate-400">البنود غير المطابقة (NM) تُرحّل لسجل الـ NCR تلقائياً</span>
+        <div class="flex items-center gap-2">
+          <button onclick="closeChecklistModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-bold rounded-xl">إلغاء</button>
+          <button onclick="saveInspectionChecklist()" class="px-5 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white text-xs font-black rounded-xl shadow-lg">💾 حفظ واعتماد الفحص</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NCR Modal -->
+  <div id="ncrModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl shadow-2xl p-5 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 id="ncrModalHeader" class="text-sm font-black text-white">⚠️ تسجيل / تعديل تقرير عدم مطابقة (NCR)</h3>
+        <button onclick="closeNcrModal()" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+      <input type="hidden" id="ncrEditIndex" value="-1">
+      <div class="space-y-3 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 mb-1 font-bold">القسم / الموقع (من الـ 36 موقعاً):</label>
+            <select id="ncrDeptSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white font-inter outline-none"></select>
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1 font-bold">مستوى الخطورة:</label>
+            <select id="ncrRiskSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none">
+              <option value="High 🔴">مرتفع (High 🔴)</option>
+              <option value="Medium 🟡" selected>متوسط (Medium 🟡)</option>
+              <option value="Low 🟢">منخفض (Low 🟢)</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-bold">وصف الملاحظة / المخالفة المرصودة:</label>
+          <textarea id="ncrDescInput" rows="2" placeholder="اكتب تفاصيل عدم المطابقة والإجراء التصحيحي المطلوب..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none"></textarea>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 mb-1 font-bold">المسؤول عن المتابعة:</label>
+            <select id="ncrRespSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none"></select>
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1 font-bold">الموعد النهائي للإغلاق:</label>
+            <input type="date" id="ncrDueDateInput" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none">
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 mb-1 font-bold">حالة التقرير:</label>
+            <select id="ncrStatusSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none">
+              <option value="Open">مفتوح (Open ⏳)</option>
+              <option value="Closed">مغلق (Closed ✓)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1 font-bold">إرفاق صورة المخالفة (اختياري):</label>
+            <input type="file" id="ncrPhotoInput" accept="image/*" class="w-full text-[11px] text-slate-400">
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
+        <button onclick="closeNcrModal()" class="px-4 py-2 bg-slate-700 text-slate-300 rounded-xl text-xs font-bold">إلغاء</button>
+        <button onclick="saveNcrForm()" class="px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-black shadow-lg">💾 حفظ تقرير الـ NCR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Incident Modal -->
+  <div id="incidentModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl shadow-2xl p-5 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 id="incidentModalHeader" class="text-sm font-black text-white">🩹 تسجيل / تعديل حادث أو إصابة عمل</h3>
+        <button onclick="closeIncidentModal()" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+      <input type="hidden" id="incidentEditIndex" value="-1">
+      <div class="space-y-3 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 mb-1 font-bold">اسم المصاب / الموظف:</label>
+            <input type="text" id="incPersonInput" placeholder="الاسم بالكامل" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1 font-bold">الوظيفة / الإدارة:</label>
+            <input type="text" id="incJobInput" placeholder="مثال: تمريض / فني صيانة..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none">
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 mb-1 font-bold">موقع الحادث (من الـ 36 موقعاً):</label>
+            <select id="incLocSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white font-inter outline-none"></select>
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1 font-bold">نوع الإصابة والتشخيص:</label>
+            <select id="incTypeSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none">
+              <option value="وخز إبرة طبية (Needle Stick)">وخز إبرة طبية (Needle Stick)</option>
+              <option value="جرح قطعي سطحي">جرح قطعي سطحي</option>
+              <option value="انزلاق / سقوط">انزلاق / سقوط</option>
+              <option value="حرق كيميائي / حراري">حرق كيميائي / حراري</option>
+              <option value="إجهاد عضلي / التواء">إجهاد عضلي / التواء</option>
+              <option value="حادث وشيك (Near Miss)">حادث وشيك (Near Miss)</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 mb-1 font-bold">التاريخ والوقت:</label>
+            <input type="text" id="incDateTimeInput" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white font-mono outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1 font-bold">أيام الغياب الناتجة:</label>
+            <input type="number" id="incLostDaysInput" value="0" min="0" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none">
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-bold">إرفاق صورة المحضر أو موقع الحادث (اختياري):</label>
+          <input type="file" id="incPhotoInput" accept="image/*" class="w-full text-[11px] text-slate-400">
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
+        <button onclick="closeIncidentModal()" class="px-4 py-2 bg-slate-700 text-slate-300 rounded-xl text-xs font-bold">إلغاء</button>
+        <button onclick="saveIncidentForm()" class="px-5 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-black shadow-lg">💾 حفظ سجل الحادث</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drill Modal -->
+  <div id="drillModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-md rounded-2xl shadow-2xl p-5 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="text-sm font-black text-white">🚨 إضافة / تعديل كود طوارئ ودريل</h3>
+        <button onclick="closeDrillModal()" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+      <input type="hidden" id="drillEditIndex" value="-1">
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-300 mb-1 font-bold">الكود / نوع الطوارئ:</label>
+          <select id="drillTitleSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none">
+            <option value="🔴 Code Red (حريق وإخلاء)">🔴 Code Red (حريق وإخلاء)</option>
+            <option value="🟡 Code Yellow (طوارئ داخلية)">🟡 Code Yellow (طوارئ داخلية)</option>
+            <option value="🌸 Code Pink (اختطاف رضيع)">🌸 Code Pink (اختطاف رضيع)</option>
+            <option value="⚫ Code Black (تهديد أمني)">⚫ Code Black (تهديد أمني)</option>
+            <option value="🟤 Code Brown (انسكاب كيميائي)">🟤 Code Brown (انسكاب كيميائي)</option>
+            <option value="🟠 Code Orange (كوارث خارجية)">🟠 Code Orange (كوارث خارجية)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-bold">القسم المستهدف:</label>
+          <select id="drillDeptSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white font-inter outline-none"></select>
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-bold">المكلف بالتدريب والتنفيذ:</label>
+          <select id="drillTrainerSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none"></select>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-300 mb-1 font-bold">التاريخ:</label>
+            <input type="date" id="drillDateInput" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1 font-bold">الحالة:</label>
+            <select id="drillStatusSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none">
+              <option value="مجدول ⏳">مجدول ⏳</option>
+              <option value="تم التنفيذ بنجاح ✓">تم التنفيذ بنجاح ✓</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
+        <button onclick="closeDrillModal()" class="px-4 py-2 bg-slate-700 text-slate-300 rounded-xl text-xs font-bold">إلغاء</button>
+        <button onclick="saveDrillForm()" class="px-5 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-xl text-xs font-black shadow-lg">💾 حفظ الدريل</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Training Modal -->
+  <div id="trainingModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-md rounded-2xl shadow-2xl p-5 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="text-sm font-black text-white">🎓 إضافة تدريب ميداني جديد (Safety Training)</h3>
+        <button onclick="closeTrainingModal()" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-300 mb-1 font-bold">موضوع التدريب:</label>
+          <input type="text" id="trainingTopicInput" placeholder="مثال: الاستخدام الآمن لطفايات الحريق / التعامل مع الانسكابات..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-300 mb-1 font-bold">القسم المستهدف:</label>
+            <select id="trainingDeptSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white font-inter outline-none"></select>
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1 font-bold">المدرب / المسؤول:</label>
+            <select id="trainingTrainerSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none"></select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-300 mb-1 font-bold">عدد المتدربين المستهدف:</label>
+            <input type="number" id="trainingAttendeesInput" value="10" min="1" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1 font-bold">التاريخ المحدد:</label>
+            <input type="date" id="trainingDateInput" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none">
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
+        <button onclick="closeTrainingModal()" class="px-4 py-2 bg-slate-700 text-slate-300 rounded-xl text-xs font-bold">إلغاء</button>
+        <button onclick="saveTrainingForm()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black shadow-lg">💾 حفظ التدريب</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Member Add/Edit Modal -->
+  <div id="memberModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-md rounded-2xl shadow-2xl p-5 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 id="memberModalTitle" class="text-sm font-bold text-white">👤 إضافة / تعديل بيانات عضو الفريق</h3>
+        <button onclick="closeMemberModal()" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+      <input type="hidden" id="memberEditId" value="-1">
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-300 mb-1 font-bold">الاسم بالكامل:</label>
+          <input type="text" id="modalMemberName" placeholder="اسم العضو بالكامل" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none">
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-bold">المسمى الوظيفي (Role):</label>
+          <input type="text" id="modalMemberRole" placeholder="Supervisor Officer / Senior Officer / Officer" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white font-inter outline-none">
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-bold">رقم الهاتف (واتساب):</label>
+          <input type="text" id="modalMemberPhone" placeholder="2010xxxxxxxx" dir="ltr" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white font-mono outline-none">
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-bold">كلمة المرور الخاصة بالعضو:</label>
+          <input type="text" id="modalMemberPass" placeholder="123" dir="ltr" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-teal-300 font-mono outline-none">
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeMemberModal()" class="px-3.5 py-1.5 bg-slate-700 text-slate-300 rounded-lg text-xs">إلغاء</button>
+        <button onclick="handleSaveMember()" class="px-4.5 py-1.5 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-xs font-bold">💾 حفظ البيانات</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Print Preview Modal -->
+  <div id="printPreviewModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-3 hidden">
+    <div class="bg-white text-slate-900 w-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
+      <div class="p-3.5 bg-slate-100 border-b border-slate-300 flex flex-wrap items-center justify-between gap-2 no-print">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-black text-slate-800">🖨️ معاينة التقرير الرسمي المعتمد</span>
+          <span class="text-[10px] text-teal-700 bg-teal-100 px-2 py-0.5 rounded font-bold">يمكنك التعديل المباشر على أي نص داخل التقرير قبل الطباعة</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="executeSmartPrint()" class="px-4 py-1.5 bg-teal-700 hover:bg-teal-600 text-white rounded-lg text-xs font-bold shadow flex items-center gap-1">
+            <span>🖨️ طباعة على الطابعة (Print)</span>
+          </button>
+          <button onclick="downloadDirectPdfReport()" id="btnDownloadPdf" class="px-4 py-1.5 bg-rose-700 hover:bg-rose-600 text-white rounded-lg text-xs font-bold shadow flex items-center gap-1">
+            <span>📥 تحميل ملف PDF مباشر</span>
+          </button>
+          <button onclick="downloadPrintableHtmlReport()" class="px-3 py-1.5 bg-blue-700 hover:bg-blue-600 text-white rounded-lg text-xs font-bold shadow flex items-center gap-1">
+            <span>📄 تنزيل نسخة للطباعة</span>
+          </button>
+          <button onclick="document.getElementById('printPreviewModal').classList.add('hidden')" class="px-3 py-1.5 bg-slate-300 hover:bg-slate-400 text-slate-800 rounded-lg text-xs font-bold">إغلاق ✕</button>
+        </div>
+      </div>
+      <div id="printPreviewContent" contenteditable="true" class="p-8 overflow-y-auto flex-1 bg-white outline-none"></div>
+    </div>
+  </div>
+
+  <!-- Password Change Modal -->
+  <div id="passwordChangeModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-2xl shadow-2xl p-5 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="text-sm font-bold text-white">🔒 تغيير كلمة المرور الشخصية</h3>
+        <button onclick="closePasswordChangeModal()" class="text-slate-400">✕</button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <input type="password" id="modalNewPasswordInput" placeholder="كلمة المرور الجديدة" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none">
+        <input type="password" id="modalConfirmPasswordInput" placeholder="تأكيد كلمة المرور" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none">
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closePasswordChangeModal()" class="px-3 py-1.5 bg-slate-700 text-slate-300 rounded-lg text-xs">إلغاء</button>
+        <button onclick="handlePasswordChange()" class="px-4 py-1.5 bg-teal-600 text-white rounded-lg text-xs font-bold">حفظ في السحابة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Department Modal -->
+  <div id="departmentModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-md rounded-2xl shadow-2xl p-5 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="text-sm font-bold text-white">📍 إضافة قسم / موقع فحص جديد</h3>
+        <button onclick="closeDepartmentModal()" class="text-slate-400">✕</button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <input type="text" id="modalDeptNameInput" placeholder="مثال: Pediatric ICU / Helipad" dir="ltr" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white font-inter outline-none">
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeDepartmentModal()" class="px-3.5 py-1.5 bg-slate-700 text-slate-300 rounded-lg text-xs">إلغاء</button>
+        <button onclick="handleSaveDepartment()" class="px-4.5 py-1.5 bg-teal-600 text-white rounded-lg text-xs font-bold">إضافة للقوائم</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastNotification" class="fixed bottom-4 left-4 z-50 transform translate-y-20 opacity-0 transition-all duration-300 px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2 bg-slate-900 text-white border border-slate-700 pointer-events-none">
+    <span id="toastIcon">✅</span>
+    <span id="toastMessage">تم الحفظ بنجاح</span>
+  </div>
+
+  <!-- ================= APPLICATION JAVASCRIPT ENGINE ================= -->
+  <script>
+    window.onerror = function() { return true; };
+
+    const FIREBASE_DB_URL = "https://safety-alnas-hospital-default-rtdb.firebaseio.com/";
+    const STORAGE_KEY_PASSWORDS = 'alnas_secure_passwords_vault';
+    const STORAGE_KEY_TEAM = 'alnas_team_master_v2';
+    const STORAGE_KEY_SCHEDULE = 'alnas_schedule_master_v2';
+    const STORAGE_KEY_KPIS = 'alnas_kpis_master_v2';
+    const STORAGE_KEY_DEPTS = 'alnas_depts_master_v2';
+    const STORAGE_KEY_ACTIVITIES = 'alnas_activities_master_v2';
+    const STORAGE_KEY_NCRS = 'alnas_ncrs_master_v2';
+    const STORAGE_KEY_INCIDENTS = 'alnas_incidents_master_v2';
+    const STORAGE_KEY_QUESTIONS = 'alnas_questions_master_v2';
+    const STORAGE_KEY_TRAININGS = 'alnas_trainings_master_v2';
+    const STORAGE_KEY_INSPECTION_LOGS = 'alnas_inspection_logs_v2';
+    const STORAGE_KEY_LOGGED_USER = 'alnas_logged_user_session_v2';
+
+    let dbRef = null;
+    try {
+      if (typeof firebase !== 'undefined') {
+        const app = firebase.initializeApp({ databaseURL: FIREBASE_DB_URL });
+        const db = firebase.database();
+        dbRef = db.ref("alnas_safety_master_data");
+        db.ref(".info/connected").on("value", function(snap) {
+          const dot = document.getElementById('syncStatusDot');
+          const txt = document.getElementById('syncStatusText');
+          if (snap.val() === true) {
+            if (dot) dot.className = "w-2 h-2 rounded-full bg-emerald-400";
+            if (txt) txt.textContent = "Firebase متصل 🟢";
+          } else {
+            if (dot) dot.className = "w-2 h-2 rounded-full bg-amber-400";
+            if (txt) txt.textContent = "وضع محلي / مزامنة 🟡";
+          }
+        });
+      }
+    } catch (e) {}
+
+    // All 36 Official English Departments
+    const defaultDepartments = [
+      "Main OR", "Cathlab", "CCU", "ICU 1 (Sec. 4)", "ICU 2 (Sec. 3)", "ICU 3",
+      "NICU", "ER", "Radiology", "Lab", "Pharmacy", "Endoscopy", "CSSD",
+      "Medical gas Station", "Chiller room", "Boilers Room", "Ups Room", "Warehouse",
+      "Laundry", "Chemical Spill Kit", "Eye washer and shower", "Electrical Room",
+      "Elevator", "Stairwells", "First Aid", "Medical waste room", "Chemical store (HK)",
+      "GW 1 (Sec. 2)", "GW 2 (Sec. 1)", "GW 3", "GW 4", "Generator",
+      "Fire pump room", "Cooling tower", "GIT (OPD 2)", "OPD"
+    ];
+
+    let officialDepartments = JSON.parse(localStorage.getItem(STORAGE_KEY_DEPTS)) || defaultDepartments;
+
+    const initialTeam = [
+      { id: 1, name: "م/ عمر فريد العزب", role: "مدير السلامة والصحة المهنية", phone: "201000000001", isLeader: false, isManager: true, password: "123" },
+      { id: 2, name: "م/ أحمد نبيه", role: "Team Leader", phone: "201000000002", isLeader: true, isManager: false, password: "123" },
+      { id: 3, name: "مصطفى طارق", role: "Supervisor Officer", phone: "201007148285", isLeader: false, isManager: false, password: "123" },
+      { id: 4, name: "علي محمد محروس", role: "Supervisor Officer", phone: "201000000004", isLeader: false, isManager: false, password: "123" },
+      { id: 5, name: "أحمد عبد الحميد", role: "Senior Officer", phone: "201000000005", isLeader: false, isManager: false, password: "123" },
+      { id: 6, name: "سامح يوسف", role: "Senior Officer", phone: "201000000006", isLeader: false, isManager: false, password: "123" },
+      { id: 7, name: "صلاح حمدي", role: "Senior Officer", phone: "201000000007", isLeader: false, isManager: false, password: "123" },
+      { id: 8, name: "مصطفى عبد الله", role: "Officer", phone: "201000000008", isLeader: false, isManager: false, password: "123" },
+      { id: 9, name: "يوسف مجدي", role: "Officer", phone: "201000000009", isLeader: false, isManager: false, password: "123" }
+    ];
+
+    let activeTeam = JSON.parse(localStorage.getItem(STORAGE_KEY_TEAM)) || initialTeam;
+    activeTeam.forEach(m => {
+      if (m.id === 2 || m.name === "أحمد نبيه" || m.name === "احمد نبيه") {
+        m.name = "م/ أحمد نبيه";
+      }
+    });
+    let fieldInspectors = activeTeam.filter(u => !u.isManager && !u.isLeader);
+
+    function refreshFieldInspectors() {
+      fieldInspectors = (activeTeam || []).filter(u => !u.isManager && !u.isLeader);
+    }
+
+    function getStoredPassword(userId) {
+      const member = (activeTeam || []).find(u => String(u.id) === String(userId));
+      if (member && member.password && member.password !== "123") return String(member.password);
+      try {
+        const vault = JSON.parse(localStorage.getItem(STORAGE_KEY_PASSWORDS) || '{}');
+        if (vault[userId]) return String(vault[userId]);
+      } catch (e) {}
+      return (member && member.password) ? String(member.password) : "123";
+    }
+
+    function setStoredPassword(userId, newPassword) {
+      try {
+        let vault = JSON.parse(localStorage.getItem(STORAGE_KEY_PASSWORDS) || '{}');
+        vault[userId] = String(newPassword);
+        localStorage.setItem(STORAGE_KEY_PASSWORDS, JSON.stringify(vault));
+        const member = (activeTeam || []).find(u => String(u.id) === String(userId));
+        if (member) member.password = String(newPassword);
+      } catch (e) {}
+    }
+
+    const defaultSchedule = [
+      {
+        day: "السبت",
+        morningUnits: [{ location: "Lab", officer: "مصطفى طارق" }, { location: "Chiller room", officer: "أحمد عبد الحميد" }],
+        nightUnits: [{ location: "CCU", officer: "سامح يوسف" }, { location: "Pharmacy", officer: "مصطفى عبد الله" }]
+      },
+      {
+        day: "الأحد",
+        morningUnits: [{ location: "Ups Room", officer: "علي محمد محروس" }, { location: "GIT (OPD 2)", officer: "صلاح حمدي" }, { location: "Boilers Room", officer: "يوسف مجدي" }],
+        nightUnits: [{ location: "GW 1 (Sec. 2)", officer: "مصطفى طارق" }, { location: "GW 2 (Sec. 1)", officer: "أحمد عبد الحميد" }, { location: "GW 3", officer: "سامح يوسف" }]
+      },
+      {
+        day: "الاثنين",
+        morningUnits: [{ location: "Warehouse", officer: "صلاح حمدي" }, { location: "OPD", officer: "مصطفى عبد الله" }, { location: "Medical gas Station", officer: "يوسف مجدي" }],
+        nightUnits: [{ location: "ICU 1 (Sec. 4)", officer: "مصطفى طارق" }, { location: "ICU 2 (Sec. 3)", officer: "علي محمد محروس" }, { location: "ICU 3", officer: "أحمد عبد الحميد" }]
+      },
+      {
+        day: "الثلاثاء",
+        morningUnits: [{ location: "Cathlab", officer: "سامح يوسف" }, { location: "Main OR", officer: "مصطفى طارق" }],
+        nightUnits: [{ location: "NICU", officer: "صلاح حمدي" }, { location: "ER", officer: "مصطفى عبد الله" }, { location: "Electrical Room", officer: "يوسف مجدي" }]
+      },
+      {
+        day: "الأربعاء",
+        morningUnits: [{ location: "Radiology", officer: "علي محمد محروس" }, { location: "Laundry", officer: "أحمد عبد الحميد" }],
+        nightUnits: [{ location: "Elevator", officer: "سامح يوسف" }, { location: "Stairwells", officer: "صلاح حمدي" }, { location: "First Aid", officer: "مصطفى عبد الله" }]
+      },
+      {
+        day: "الخميس",
+        morningUnits: [{ location: "Chemical Spill Kit", officer: "مصطفى طارق" }, { location: "Eye washer and shower", officer: "يوسف مجدي" }],
+        nightUnits: [{ location: "Medical waste room", officer: "علي محمد محروس" }, { location: "Chemical store (HK)", officer: "أحمد عبد الحميد" }, { location: "GW 4", officer: "سامح يوسف" }]
+      },
+      {
+        day: "الجمعة",
+        morningUnits: [{ location: "CSSD", officer: "صلاح حمدي" }, { location: "Endoscopy", officer: "مصطفى عبد الله" }],
+        nightUnits: [{ location: "Generator", officer: "مصطفى طارق" }, { location: "Fire pump room", officer: "علي محمد محروس" }, { location: "Cooling tower", officer: "يوسف مجدي" }]
+      }
+    ];
+
+    let weeklySchedule = JSON.parse(localStorage.getItem(STORAGE_KEY_SCHEDULE)) || defaultSchedule;
+    let currentUser = null;
+    let officersKpis = JSON.parse(localStorage.getItem(STORAGE_KEY_KPIS)) || {};
+    let activitiesList = JSON.parse(localStorage.getItem(STORAGE_KEY_ACTIVITIES)) || [
+      { id: 1, title: "🔴 Code Red (حريق وإخلاء)", dept: "Main OR", trainer: "مصطفى طارق", date: "2026-11-10", status: "مجدول ⏳" },
+      { id: 2, title: "🟤 Code Brown (انسكاب كيميائي)", dept: "Lab", trainer: "أحمد عبد الحميد", date: "2026-11-15", status: "مجدول ⏳" },
+      { id: 3, title: "🟡 Code Yellow (طوارئ داخلية)", dept: "NICU", trainer: "علي محمد محروس", date: "2026-11-20", status: "مجدول ⏳" }
+    ];
+    let ncrList = JSON.parse(localStorage.getItem(STORAGE_KEY_NCRS)) || [];
+    let incidentsList = JSON.parse(localStorage.getItem(STORAGE_KEY_INCIDENTS)) || [];
+    let trainingsList = JSON.parse(localStorage.getItem(STORAGE_KEY_TRAININGS)) || [
+      { id: 1, topic: "التدريب على استخدام طفايات الحريق وخطة الإخلاء", dept: "Main OR", trainer: "مصطفى طارق", attendees: 12, date: "2026-11-12", status: "مجدول ⏳" },
+      { id: 2, topic: "التعامل الآمن مع الانسكابات الكيميائية (Spill Kit)", dept: "Lab", trainer: "أحمد عبد الحميد", attendees: 8, date: "2026-11-16", status: "مجدول ⏳" }
+    ];
+    let inspectionLogsList = JSON.parse(localStorage.getItem(STORAGE_KEY_INSPECTION_LOGS)) || [];
+
+    const defaultChecklistQuestions = [
+      { id: 1, category: "Fire Safety (NFPA)", text: "Fire extinguishers, hose reels & FM200 panels are accessible, inspected and unobstructed." },
+      { id: 2, category: "Means of Egress", text: "Emergency exits, corridors and stairwells are clear, illuminated and unlocked." },
+      { id: 3, category: "Electrical Safety", text: "Electrical panels, UPS outlets & grounding connections are secure and labeled." },
+      { id: 4, category: "HAZMAT & Spill Kit", text: "Chemical Spill Kit, Eye Washer & SDS sheets are available and intact." },
+      { id: 5, category: "Medical Gas & Env", text: "Medical gas area shut-off valves, pressure gauges & waste segregation comply with GAHAR." }
+    ];
+    let standardChecklistQuestions = JSON.parse(localStorage.getItem(STORAGE_KEY_QUESTIONS)) || defaultChecklistQuestions;
+
+    function syncKpiKeysWithTeam() {
+      fieldInspectors.forEach(off => {
+        if (!officersKpis[off.id]) {
+          officersKpis[off.id] = { inspections: 0, ncrsClosed: 0, drills: 0 };
+        }
+      });
+      Object.keys(officersKpis).forEach(id => {
+        if (!fieldInspectors.some(off => String(off.id) === String(id))) {
+          delete officersKpis[id];
+        }
+      });
+    }
+
+    if (dbRef) {
+      dbRef.on("value", (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          if (data.passwordsVault) localStorage.setItem(STORAGE_KEY_PASSWORDS, JSON.stringify(data.passwordsVault));
+          if (data.team) {
+            activeTeam = data.team;
+            const vault = data.passwordsVault || {};
+            activeTeam.forEach(m => {
+              if (m.id === 2 || m.name === "أحمد نبيه" || m.name === "احمد نبيه") {
+                m.name = "م/ أحمد نبيه";
+              }
+              if (vault[m.id]) m.password = String(vault[m.id]);
+            });
+          }
+          if (data.schedule) weeklySchedule = data.schedule;
+          if (data.kpis) officersKpis = data.kpis;
+          if (data.depts) officialDepartments = data.depts;
+          if (data.activities) activitiesList = data.activities;
+          if (data.ncrs) ncrList = data.ncrs;
+          if (data.incidents) incidentsList = data.incidents;
+          if (data.questions) standardChecklistQuestions = data.questions;
+          if (data.trainings) trainingsList = data.trainings;
+          if (data.inspectionLogs) inspectionLogsList = data.inspectionLogs;
+
+          if (currentUser) {
+            const updatedMe = activeTeam.find(u => String(u.id) === String(currentUser.id));
+            if (updatedMe) currentUser = updatedMe;
+          }
+
+          refreshFieldInspectors();
+          syncKpiKeysWithTeam();
+          renderAllViews();
+        }
+      });
+    }
+
+    function persistAllData() {
+      try {
+        localStorage.setItem(STORAGE_KEY_TEAM, JSON.stringify(activeTeam));
+        localStorage.setItem(STORAGE_KEY_SCHEDULE, JSON.stringify(weeklySchedule));
+        localStorage.setItem(STORAGE_KEY_KPIS, JSON.stringify(officersKpis));
+        localStorage.setItem(STORAGE_KEY_DEPTS, JSON.stringify(officialDepartments));
+        localStorage.setItem(STORAGE_KEY_ACTIVITIES, JSON.stringify(activitiesList));
+        localStorage.setItem(STORAGE_KEY_NCRS, JSON.stringify(ncrList));
+        localStorage.setItem(STORAGE_KEY_INCIDENTS, JSON.stringify(incidentsList));
+        localStorage.setItem(STORAGE_KEY_QUESTIONS, JSON.stringify(standardChecklistQuestions));
+        localStorage.setItem(STORAGE_KEY_TRAININGS, JSON.stringify(trainingsList));
+        localStorage.setItem(STORAGE_KEY_INSPECTION_LOGS, JSON.stringify(inspectionLogsList));
+        if (dbRef) {
+          dbRef.set({
+            team: activeTeam,
+            passwordsVault: JSON.parse(localStorage.getItem(STORAGE_KEY_PASSWORDS) || '{}'),
+            schedule: weeklySchedule,
+            kpis: officersKpis,
+            depts: officialDepartments,
+            activities: activitiesList,
+            ncrs: ncrList,
+            incidents: incidentsList,
+            questions: standardChecklistQuestions,
+            trainings: trainingsList,
+            inspectionLogs: inspectionLogsList,
+            updatedAt: new Date().toISOString()
+          }).catch(() => {});
+        }
+      } catch (e) {}
+    }
+
+    function commitAndSaveAllChangesToApp() {
+      persistAllData();
+      showToast("✅ تم حفظ وتثبيت كافة التعديلات في السحابة المركزية Firebase!");
+    }
+
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toastNotification');
+      const icon = document.getElementById('toastIcon');
+      const msg = document.getElementById('toastMessage');
+      if (!toast || !msg) return;
+      msg.textContent = message;
+      if (icon) icon.textContent = isError ? '⚠️' : '✅';
+      toast.className = isError 
+        ? "fixed bottom-4 left-4 z-50 px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2 bg-rose-950 text-rose-200 border border-rose-800 transition-all duration-300 transform translate-y-0 opacity-100"
+        : "fixed bottom-4 left-4 z-50 px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2 bg-slate-900 text-teal-300 border border-teal-700 transition-all duration-300 transform translate-y-0 opacity-100";
+      clearTimeout(window.toastTimer);
+      window.toastTimer = setTimeout(() => {
+        toast.className = "fixed bottom-4 left-4 z-50 transform translate-y-20 opacity-0 transition-all duration-300 px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2 bg-slate-900 text-white border border-slate-700 pointer-events-none";
+      }, 3500);
+    }
+
+    function updateCairoTimeAndCalendar() {
+      try {
+        const now = new Date();
+        const timeStr = new Intl.DateTimeFormat('ar-EG', { timeZone: 'Africa/Cairo', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }).format(now);
+        const dateStr = new Intl.DateTimeFormat('ar-EG', { timeZone: 'Africa/Cairo', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(now);
+        const timeElem = document.getElementById('cairoTimeLive');
+        const dateElem = document.getElementById('cairoDateLive');
+        const shiftElem = document.getElementById('currentActiveShiftBadge');
+        if (timeElem) timeElem.textContent = timeStr;
+        if (dateElem) dateElem.textContent = dateStr;
+
+        const hourCairo = parseInt(new Intl.DateTimeFormat('en-US', { timeZone: 'Africa/Cairo', hour: 'numeric', hour12: false }).format(now));
+        if (shiftElem) {
+          if (hourCairo >= 8 && hourCairo < 20) {
+            shiftElem.textContent = "☀️ الشفت الصباحي (08:00 AM - 08:00 PM)";
+            shiftElem.className = "text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30";
+          } else {
+            shiftElem.textContent = "🌙 الشفت المسائي (08:00 PM - 08:00 AM)";
+            shiftElem.className = "text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30";
+          }
+        }
+      } catch (e) {}
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        btn.className = "nav-tab px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 text-slate-400 hover:text-slate-200 hover:bg-slate-800";
+      });
+      const target = document.getElementById(tabId);
+      const targetBtn = document.getElementById('tabBtn_' + tabId);
+      if (target) target.classList.remove('hidden');
+      if (targetBtn) targetBtn.className = "nav-tab px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 bg-teal-600 text-white shadow-lg";
+    }
+
+    function isMasterAdmin() {
+      if (!currentUser) return false;
+      return Boolean(currentUser.isManager || currentUser.isLeader || currentUser.name.includes("أحمد نبيه") || currentUser.name.includes("عمر فريد"));
+    }
+
+    function buildLocationOptions(selectedLoc) {
+      return (officialDepartments || []).map(loc => `<option value="${loc}" ${loc === selectedLoc ? 'selected' : ''}>📍 ${loc}</option>`).join('');
+    }
+
+    function buildOfficerOptions(selectedOfficer) {
+      return (fieldInspectors || []).map(off => `<option value="${off.name}" ${off.name === selectedOfficer ? 'selected' : ''}>👤 ${off.name}</option>`).join('');
+    }
+
+    // حساب التاريخ الفعلي الموافق لكل يوم من أيام الأسبوع الحالي تلقائياً (السبت -> الجمعة)
+    function getActualDateForDayName(dayName, dayIdx = 0) {
+      try {
+        const now = new Date();
+        const jsDay = now.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+        // تحويل الفهرس بحيث يبدأ الأسبوع من السبت = 0 وحتى الجمعة = 6
+        const currentSatBasedIdx = (jsDay + 1) % 7;
+        const dayMap = {
+          "السبت": 0,
+          "الأحد": 1,
+          "الاحد": 1,
+          "الاثنين": 2,
+          "الإثنين": 2,
+          "الثلاثاء": 3,
+          "الأربعاء": 4,
+          "الاربعاء": 4,
+          "الخميس": 5,
+          "الجمعة": 6
+        };
+        let targetIdx = dayIdx % 7;
+        const cleanName = (dayName || "").trim();
+        for (const key in dayMap) {
+          if (cleanName.includes(key)) {
+            targetIdx = dayMap[key];
+            break;
+          }
+        }
+        const diffDays = targetIdx - currentSatBasedIdx;
+        const targetDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffDays);
+        const formattedAr = new Intl.DateTimeFormat('ar-EG', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        }).format(targetDate);
+        const yyyy = targetDate.getFullYear();
+        const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(targetDate.getDate()).padStart(2, '0');
+        return {
+          formattedAr,
+          numeric: `${yyyy}/${mm}/${dd}`,
+          isToday: diffDays === 0
+        };
+      } catch (e) {
+        return { formattedAr: "", numeric: "", isToday: false };
+      }
+    }
+
+    // ================= 1. WEEKLY SCHEDULE =================
+    function renderWeeklySchedule() {
+      const container = document.getElementById('weeklyScheduleContainer');
+      if (!container) return;
+      const canEdit = isMasterAdmin();
+
+      container.innerHTML = (weeklySchedule || []).map((item, dayIndex) => {
+        const dateInfo = getActualDateForDayName(item.day, dayIndex);
+        const isToday = dateInfo.isToday;
+        const morningHtml = (item.morningUnits || []).map((u, uIdx) => `
+          <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-700/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+            <div class="flex items-center gap-2 flex-1">
+              <span class="text-amber-400 text-xs">☀️</span>
+              ${canEdit 
+                ? `<select onchange="updateScheduleLocation(${dayIndex}, 'morning', ${uIdx}, this.value)" class="bg-slate-800 text-white font-bold rounded-lg px-2 py-1.5 text-xs border border-slate-600 outline-none flex-1 font-inter">${buildLocationOptions(u.location)}</select>`
+                : `<span class="text-white font-bold text-xs font-inter">📍 ${u.location}</span>`}
+            </div>
+            <div class="flex items-center gap-2">
+              ${canEdit
+                ? `<select onchange="updateScheduleOfficer(${dayIndex}, 'morning', ${uIdx}, this.value)" class="bg-slate-800 text-teal-300 font-semibold rounded-lg px-2 py-1.5 text-xs border border-slate-600 outline-none">${buildOfficerOptions(u.officer)}</select>`
+                : `<span class="text-teal-300 font-semibold text-xs">👤 ${u.officer}</span>`}
+              <button onclick="openChecklistForLocation('${u.location}', '${u.officer}')" class="px-2.5 py-1.5 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-lg text-[11px]">📋 فحص</button>
+              ${canEdit ? `<button onclick="deleteScheduleUnit(${dayIndex}, 'morning', ${uIdx})" class="p-1.5 bg-rose-950/70 hover:bg-rose-800 text-rose-300 rounded-lg text-xs border border-rose-800">🗑️</button>` : ''}
+            </div>
+          </div>
+        `).join('');
+
+        const nightHtml = (item.nightUnits || []).map((u, uIdx) => `
+          <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-700/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+            <div class="flex items-center gap-2 flex-1">
+              <span class="text-indigo-400 text-xs">🌙</span>
+              ${canEdit
+                ? `<select onchange="updateScheduleLocation(${dayIndex}, 'night', ${uIdx}, this.value)" class="bg-slate-800 text-white font-bold rounded-lg px-2 py-1.5 text-xs border border-slate-600 outline-none flex-1 font-inter">${buildLocationOptions(u.location)}</select>`
+                : `<span class="text-white font-bold text-xs font-inter">📍 ${u.location}</span>`}
+            </div>
+            <div class="flex items-center gap-2">
+              ${canEdit
+                ? `<select onchange="updateScheduleOfficer(${dayIndex}, 'night', ${uIdx}, this.value)" class="bg-slate-800 text-indigo-300 font-semibold rounded-lg px-2 py-1.5 text-xs border border-slate-600 outline-none">${buildOfficerOptions(u.officer)}</select>`
+                : `<span class="text-indigo-300 font-semibold text-xs">👤 ${u.officer}</span>`}
+              <button onclick="openChecklistForLocation('${u.location}', '${u.officer}')" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg text-[11px]">📋 فحص</button>
+              ${canEdit ? `<button onclick="deleteScheduleUnit(${dayIndex}, 'night', ${uIdx})" class="p-1.5 bg-rose-950/70 hover:bg-rose-800 text-rose-300 rounded-lg text-xs border border-rose-800">🗑️</button>` : ''}
+            </div>
+          </div>
+        `).join('');
+
+        return `
+          <div class="card-glass rounded-2xl p-4 ${isToday ? 'border-teal-500 ring-2 ring-teal-500/20 bg-slate-800/80' : 'border-slate-800'}">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-700/80">
+              <div class="flex flex-wrap items-center gap-2.5">
+                ${canEdit 
+                  ? `<input type="text" value="${item.day}" onchange="updateScheduleDayName(${dayIndex}, this.value)" class="editable-input text-sm font-black text-white w-28">`
+                  : `<span class="text-base font-black text-white">${item.day}</span>`}
+                <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-900/90 text-teal-300 border border-slate-700">📅 الموافق: ${dateInfo.formattedAr} (${dateInfo.numeric})</span>
+                ${isToday ? '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-teal-500 text-slate-950">اليوم الحالي ⚡</span>' : ''}
+              </div>
+              ${canEdit ? `<button onclick="deleteScheduleDay(${dayIndex})" class="px-2.5 py-1 bg-rose-950/60 hover:bg-rose-900 text-rose-300 rounded-lg text-[10px] font-bold border border-rose-800/60">🗑️ حذف اليوم</button>` : ''}
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs font-bold text-amber-300 px-1">
+                  <span>☀️ الشفت الصباحي (08:00 AM - 08:00 PM)</span>
+                  ${canEdit ? `<button onclick="addNewScheduleUnit(${dayIndex}, 'morning')" class="px-2 py-0.5 bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-700/60 rounded text-[10px]">➕ إضافة موقع</button>` : ''}
+                </div>
+                <div class="space-y-2">${morningHtml}</div>
+              </div>
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs font-bold text-indigo-300 px-1">
+                  <span>🌙 الشفت المسائي (08:00 PM - 08:00 AM)</span>
+                  ${canEdit ? `<button onclick="addNewScheduleUnit(${dayIndex}, 'night')" class="px-2 py-0.5 bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 border border-indigo-700/60 rounded text-[10px]">➕ إضافة موقع</button>` : ''}
+                </div>
+                <div class="space-y-2">${nightHtml}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateScheduleDayName(dayIdx, val) {
+      if (!val.trim()) return;
+      weeklySchedule[dayIdx].day = val.trim();
+      persistAllData();
+      renderAllViews();
+    }
+
+    function addNewDayToSchedule() {
+      weeklySchedule.push({
+        day: "يوم إضافي",
+        morningUnits: [{ location: officialDepartments[0] || "Main OR", officer: fieldInspectors[0]?.name || "مصطفى طارق" }],
+        nightUnits: [{ location: officialDepartments[1] || "CCU", officer: fieldInspectors[1]?.name || "سامح يوسف" }]
+      });
+      persistAllData();
+      renderAllViews();
+      showToast("تمت إضافة يوم جديد للجدول 📅");
+    }
+
+    function deleteScheduleDay(dayIdx) {
+      weeklySchedule.splice(dayIdx, 1);
+      persistAllData();
+      renderAllViews();
+      showToast("تم حذف اليوم من الجدول 🗑️");
+    }
+
+    function updateScheduleLocation(dayIdx, shift, uIdx, val) {
+      if (shift === 'morning') weeklySchedule[dayIdx].morningUnits[uIdx].location = val;
+      else weeklySchedule[dayIdx].nightUnits[uIdx].location = val;
+      persistAllData();
+      renderUnifiedPlanView();
+    }
+
+    function updateScheduleOfficer(dayIdx, shift, uIdx, val) {
+      if (shift === 'morning') weeklySchedule[dayIdx].morningUnits[uIdx].officer = val;
+      else weeklySchedule[dayIdx].nightUnits[uIdx].officer = val;
+      persistAllData();
+      renderUnifiedPlanView();
+    }
+
+    function addNewScheduleUnit(dayIdx, shift) {
+      const unit = { location: officialDepartments[0] || "Main OR", officer: fieldInspectors[0]?.name || "مصطفى طارق" };
+      if (shift === 'morning') weeklySchedule[dayIdx].morningUnits.push(unit);
+      else weeklySchedule[dayIdx].nightUnits.push(unit);
+      persistAllData();
+      renderAllViews();
+    }
+
+    function deleteScheduleUnit(dayIdx, shift, uIdx) {
+      if (shift === 'morning') weeklySchedule[dayIdx].morningUnits.splice(uIdx, 1);
+      else weeklySchedule[dayIdx].nightUnits.splice(uIdx, 1);
+      persistAllData();
+      renderAllViews();
+    }
+
+    // ================= 2. CHECKLISTS & 36 DEPARTMENTS =================
+    let currentChecklistDepartment = "";
+    let currentChecklistOfficer = "";
+
+    function openChecklistForLocation(loc, officer) {
+      currentChecklistDepartment = loc;
+      currentChecklistOfficer = officer || (currentUser ? currentUser.name : "مصطفى طارق");
+      document.getElementById('checklistModalTitle').textContent = `قائمة الفحص الميداني: ${loc}`;
+      document.getElementById('checklistOfficerName').textContent = currentChecklistOfficer;
+      renderChecklistQuestionsInsideModal();
+      document.getElementById('checklistModal').classList.remove('hidden');
+    }
+
+    function renderChecklistQuestionsInsideModal() {
+      const canEdit = isMasterAdmin();
+      document.getElementById('checklistItemsContainer').innerHTML = standardChecklistQuestions.map((q, idx) => `
+        <div class="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/80 space-y-2">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="flex-1 space-y-1.5">
+              <div class="flex items-center gap-2">
+                ${canEdit
+                  ? `<input type="text" value="${q.category}" onchange="updateChecklistQuestionField(${idx}, 'category', this.value)" class="editable-input text-[10px] font-bold text-teal-300 w-44">
+                     <button onclick="deleteChecklistQuestion(${idx})" class="text-rose-400 hover:text-rose-300 text-xs">🗑️ حذف البند</button>`
+                  : `<span class="text-[10px] font-bold text-teal-300">${q.category}</span>`}
+              </div>
+              ${canEdit
+                ? `<input type="text" value="${q.text}" onchange="updateChecklistQuestionField(${idx}, 'text', this.value)" class="editable-input text-xs font-semibold text-white w-full font-inter">`
+                : `<div class="text-xs font-semibold text-white font-inter">${q.text}</div>`}
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0" dir="ltr">
+              <label class="cursor-pointer"><input type="radio" name="chk_${idx}" value="M" checked onchange="calculateChecklistScore()" class="peer sr-only"><span class="px-2.5 py-1 rounded text-[11px] font-bold bg-slate-700 text-slate-300 peer-checked:bg-emerald-600 peer-checked:text-white transition">مطابق M</span></label>
+              <label class="cursor-pointer"><input type="radio" name="chk_${idx}" value="NM" onchange="calculateChecklistScore()" class="peer sr-only"><span class="px-2.5 py-1 rounded text-[11px] font-bold bg-slate-700 text-slate-300 peer-checked:bg-rose-600 peer-checked:text-white transition">غير مطابق NM</span></label>
+            </div>
+          </div>
+          <input type="text" id="chk_note_${idx}" placeholder="أدخل ملاحظات الفحص أو سبب عدم المطابقة..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white outline-none">
+        </div>
+      `).join('');
+      calculateChecklistScore();
+    }
+
+    function updateChecklistQuestionField(idx, field, val) {
+      standardChecklistQuestions[idx][field] = val;
+      persistAllData();
+    }
+
+    function addNewQuestionToChecklist() {
+      standardChecklistQuestions.push({
+        id: Date.now(),
+        category: "Safety Standard",
+        text: "New inspection item - click to edit criteria"
+      });
+      persistAllData();
+      renderChecklistQuestionsInsideModal();
+    }
+
+    function deleteChecklistQuestion(idx) {
+      if (standardChecklistQuestions.length <= 1) return;
+      standardChecklistQuestions.splice(idx, 1);
+      persistAllData();
+      renderChecklistQuestionsInsideModal();
+    }
+
+    function openEditChecklistQuestionsModal() {
+      openChecklistForLocation(officialDepartments[0] || "Main OR", currentUser ? currentUser.name : "م/ عمر فريد العزب");
+    }
+
+    function calculateChecklistScore() {
+      let total = standardChecklistQuestions.length;
+      let passed = 0;
+      standardChecklistQuestions.forEach((q, idx) => {
+        const sel = document.querySelector(`input[name="chk_${idx}"]:checked`);
+        if (!sel || sel.value === 'M') passed++;
+      });
+      const score = total > 0 ? Math.round((passed / total) * 100) : 100;
+      const badge = document.getElementById('checklistScoreBadge');
+      if (badge) badge.textContent = score + '%';
+      return score;
+    }
+
+    function closeChecklistModal() {
+      document.getElementById('checklistModal').classList.add('hidden');
+    }
+
+    function saveInspectionChecklist() {
+      let createdNcrs = 0;
+      const score = calculateChecklistScore();
+      standardChecklistQuestions.forEach((q, idx) => {
+        const val = document.querySelector(`input[name="chk_${idx}"]:checked`)?.value;
+        const note = document.getElementById(`chk_note_${idx}`)?.value.trim();
+        if (val === 'NM') {
+          createdNcrs++;
+          ncrList.unshift({
+            id: `NCR-${String(ncrList.length + 1).padStart(3, '0')}`,
+            dept: currentChecklistDepartment,
+            desc: note || `Non-compliance in: ${q.text}`,
+            risk: "Medium 🟡",
+            responsible: currentChecklistOfficer,
+            dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
+            status: "Open",
+            photo: ""
+          });
+        }
+      });
+
+      const inspectorName = (currentUser && !currentUser.isManager && !currentUser.isLeader) ? currentUser.name : currentChecklistOfficer;
+      const officer = fieldInspectors.find(u => u.name === inspectorName) || fieldInspectors.find(u => u.name === currentChecklistOfficer);
+      if (officer) {
+        if (!officersKpis[officer.id]) officersKpis[officer.id] = { inspections: 0, ncrsClosed: 0, drills: 0 };
+        officersKpis[officer.id].inspections += 1;
+      }
+
+      inspectionLogsList.unshift({
+        id: Date.now(),
+        dateTime: new Date().toLocaleString('ar-EG'),
+        dept: currentChecklistDepartment,
+        officer: officer ? officer.name : inspectorName,
+        score: score,
+        ncrsCount: createdNcrs
+      });
+
+      persistAllData();
+      renderAllViews();
+      closeChecklistModal();
+      showToast(`✅ تم تسجيل نتيجة الفحص (${score}%) وربطها مباشرة بـ KPIs المفتش!`);
+    }
+
+    function renderChecklistsGrid() {
+      const container = document.getElementById('checklistsGrid');
+      if (!container) return;
+      const canEdit = isMasterAdmin();
+      container.innerHTML = (officialDepartments || []).map((dept, idx) => `
+        <div class="card-glass p-3.5 rounded-xl border border-slate-700/80 hover:border-teal-500 transition shadow flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-xs font-black text-white font-inter">📍 ${dept}</span>
+              ${canEdit ? `
+              <div class="flex items-center gap-1">
+                <button onclick="handleEditDepartmentName(${idx})" title="تعديل اسم الموقع" class="text-slate-400 hover:text-teal-300 text-xs p-1">✏️</button>
+                <button onclick="handleDeleteDepartment(${idx})" title="حذف الموقع" class="text-slate-400 hover:text-rose-400 text-xs p-1">🗑️</button>
+              </div>` : ''}
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1">قائمة تدقيق السلامة المعتمدة (GAHAR / NFPA)</p>
+          </div>
+          <button onclick="openChecklistForLocation('${dept}', '${currentUser ? currentUser.name : 'مصطفى طارق'}')" class="mt-3 w-full py-1.5 bg-slate-800 hover:bg-teal-600 text-teal-300 hover:text-white rounded-lg text-xs font-bold transition border border-slate-700">
+            📋 بدء التفتيش الميداني
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function handleEditDepartmentName(idx) {
+      const oldName = officialDepartments[idx];
+      const newName = prompt("تعديل اسم القسم / الموقع:", oldName);
+      if (newName && newName.trim()) {
+        officialDepartments[idx] = newName.trim();
+        persistAllData();
+        renderAllViews();
+      }
+    }
+
+    function handleDeleteDepartment(idx) {
+      officialDepartments.splice(idx, 1);
+      persistAllData();
+      renderAllViews();
+    }
+
+    function openAddDepartmentModal() { document.getElementById('departmentModal').classList.remove('hidden'); }
+    function closeDepartmentModal() { document.getElementById('departmentModal').classList.add('hidden'); }
+    function handleSaveDepartment() {
+      const val = document.getElementById('modalDeptNameInput').value.trim();
+      if (!val) return;
+      officialDepartments.push(val);
+      persistAllData();
+      renderAllViews();
+      closeDepartmentModal();
+    }
+
+    // ================= 3. ACTIVITIES & DRILLS =================
+    function renderActivitiesTable() {
+      const tbody = document.getElementById('activitiesTableBody');
+      if (!tbody) return;
+      const canEdit = isMasterAdmin();
+      tbody.innerHTML = (activitiesList || []).map((a, idx) => `
+        <tr class="border-b border-slate-800 hover:bg-slate-800/40">
+          <td class="p-2">
+            ${canEdit ? `<input type="text" value="${a.title}" onchange="updateDrillField(${idx}, 'title', this.value)" class="editable-input w-full font-bold text-teal-300 text-xs">` : `<span class="font-bold text-teal-300">${a.title}</span>`}
+          </td>
+          <td class="p-2">
+            ${canEdit ? `<select onchange="updateDrillField(${idx}, 'dept', this.value)" class="editable-input w-full font-inter text-xs">${buildLocationOptions(a.dept)}</select>` : `<span class="font-inter font-bold text-white">📍 ${a.dept}</span>`}
+          </td>
+          <td class="p-2">
+            ${canEdit ? `<select onchange="updateDrillField(${idx}, 'trainer', this.value)" class="editable-input w-full text-xs">${buildOfficerOptions(a.trainer)}</select>` : `<span class="text-slate-200">👤 ${a.trainer}</span>`}
+          </td>
+          <td class="p-2">
+            ${canEdit ? `<input type="date" value="${a.date}" onchange="updateDrillField(${idx}, 'date', this.value)" class="editable-input font-mono text-xs">` : `<span class="font-mono text-slate-400">${a.date}</span>`}
+          </td>
+          <td class="p-2">
+            ${canEdit ? `
+            <select onchange="updateDrillField(${idx}, 'status', this.value)" class="editable-input text-xs font-bold ${a.status.includes('تم') ? 'text-emerald-300' : 'text-amber-300'}">
+              <option value="مجدول ⏳" ${a.status.includes('مجدول') ? 'selected' : ''}>مجدول ⏳</option>
+              <option value="تم التنفيذ بنجاح ✓" ${a.status.includes('تم') ? 'selected' : ''}>تم التنفيذ بنجاح ✓</option>
+              <option value="مؤجل ⏸️" ${a.status.includes('مؤجل') ? 'selected' : ''}>مؤجل ⏸️</option>
+            </select>` : `<span class="font-bold ${a.status.includes('تم') ? 'text-emerald-300' : 'text-amber-300'}">${a.status}</span>`}
+          </td>
+          <td class="p-2 text-center">
+            <div class="flex items-center justify-center gap-1">
+              <button onclick="completeDrillItem(${idx})" class="px-2 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded text-[10px] font-bold">✓ تم التنفيذ</button>
+              ${canEdit ? `<button onclick="deleteDrillItem(${idx})" class="p-1 bg-rose-950 hover:bg-rose-800 text-rose-300 rounded text-xs">🗑️</button>` : ''}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateDrillField(idx, field, val) {
+      activitiesList[idx][field] = val;
+      persistAllData();
+      renderAllViews();
+    }
+
+    function openDrillModal(editIdx = -1) {
+      document.getElementById('drillEditIndex').value = editIdx;
+      document.getElementById('drillDeptSelect').innerHTML = buildLocationOptions(officialDepartments[0]);
+      document.getElementById('drillTrainerSelect').innerHTML = buildOfficerOptions(fieldInspectors[0]?.name);
+      document.getElementById('drillDateInput').value = new Date().toISOString().split('T')[0];
+      document.getElementById('drillModal').classList.remove('hidden');
+    }
+
+    function closeDrillModal() { document.getElementById('drillModal').classList.add('hidden'); }
+
+    function saveDrillForm() {
+      const title = document.getElementById('drillTitleSelect').value;
+      const dept = document.getElementById('drillDeptSelect').value;
+      const trainer = document.getElementById('drillTrainerSelect').value;
+      const date = document.getElementById('drillDateInput').value;
+      const status = document.getElementById('drillStatusSelect').value;
+      activitiesList.unshift({ id: Date.now(), title, dept, trainer, date, status });
+      persistAllData();
+      renderAllViews();
+      closeDrillModal();
+    }
+
+    function completeDrillItem(idx) {
+      const drill = activitiesList[idx];
+      if (!drill) return;
+      drill.status = "تم التنفيذ بنجاح ✓";
+      const off = fieldInspectors.find(u => u.name === drill.trainer);
+      if (off) {
+        if (!officersKpis[off.id]) officersKpis[off.id] = { inspections: 0, ncrsClosed: 0, drills: 0 };
+        officersKpis[off.id].drills += 1;
+      }
+      persistAllData();
+      renderAllViews();
+      showToast("🚨 تم توثيق الدريل وإضافته لمؤشر KPIs للمفتش!");
+    }
+
+    function deleteDrillItem(idx) {
+      activitiesList.splice(idx, 1);
+      persistAllData();
+      renderAllViews();
+    }
+
+    // ================= 4. NCRs TRACKER =================
+    function renderNcrTable() {
+      const tbody = document.getElementById('ncrTableBody');
+      if (!tbody) return;
+      const canEdit = isMasterAdmin();
+      if (!ncrList || ncrList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">لا توجد تقارير عدم مطابقة مفتوحة حالياً - اضغط على (➕ رصد ملاحظة NCR جديدة) للإضافة.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = ncrList.map((ncr, idx) => `
+        <tr class="border-b border-slate-800 hover:bg-slate-800/40">
+          <td class="p-2">
+            ${canEdit ? `<input type="text" value="${ncr.id}" onchange="updateNcrInlineField(${idx}, 'id', this.value)" class="editable-input font-mono font-bold text-rose-400 w-24 text-xs">` : `<span class="font-mono font-bold text-rose-400">${ncr.id}</span>`}
+          </td>
+          <td class="p-2">
+            ${canEdit ? `<select onchange="updateNcrInlineField(${idx}, 'dept', this.value)" class="editable-input font-inter text-xs w-36">${buildLocationOptions(ncr.dept)}</select>` : `<span class="font-inter font-bold">${ncr.dept}</span>`}
+          </td>
+          <td class="p-2">
+            ${canEdit ? `<input type="text" value="${ncr.desc}" onchange="updateNcrInlineField(${idx}, 'desc', this.value)" class="editable-input text-slate-100 w-full min-w-[180px] text-xs">` : `<span>${ncr.desc}</span>`}
+          </td>
+          <td class="p-2 text-center">${ncr.photo ? `<img src="${ncr.photo}" class="w-10 h-10 object-cover rounded border border-slate-600 mx-auto">` : '<span class="text-[10px] text-slate-500">بدون صورة</span>'}</td>
+          <td class="p-2">
+            ${canEdit ? `
+            <select onchange="updateNcrInlineField(${idx}, 'risk', this.value)" class="editable-input text-xs text-amber-300 font-bold">
+              <option value="High 🔴" ${ncr.risk.includes('High') ? 'selected' : ''}>High 🔴</option>
+              <option value="Medium 🟡" ${ncr.risk.includes('Medium') ? 'selected' : ''}>Medium 🟡</option>
+              <option value="Low 🟢" ${ncr.risk.includes('Low') ? 'selected' : ''}>Low 🟢</option>
+            </select>` : `<span class="text-amber-300 font-bold">${ncr.risk}</span>`}
+          </td>
+          <td class="p-2">
+            ${canEdit ? `<select onchange="updateNcrInlineField(${idx}, 'responsible', this.value)" class="editable-input text-xs text-teal-300">${buildOfficerOptions(ncr.responsible)}</select>` : `<span class="text-teal-300">${ncr.responsible}</span>`}
+          </td>
+          <td class="p-2">
+            ${canEdit ? `<input type="date" value="${ncr.dueDate}" onchange="updateNcrInlineField(${idx}, 'dueDate', this.value)" class="editable-input font-mono text-xs">` : `<span class="font-mono">${ncr.dueDate}</span>`}
+          </td>
+          <td class="p-2">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${ncr.status === 'Closed' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">${ncr.status}</span>
+          </td>
+          <td class="p-2 text-center">
+            <div class="flex items-center justify-center gap-1">
+              <button onclick="toggleNcrStatus(${idx})" class="px-2 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded text-[10px] font-bold">${ncr.status === 'Closed' ? 'فتح' : '✓ إغلاق'}</button>
+              <button onclick="openNcrModal(${idx})" title="إرفاق / تعديل الصورة" class="p-1 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded text-xs">📷</button>
+              ${canEdit ? `<button onclick="deleteNcrItem(${idx})" class="p-1 bg-rose-950 hover:bg-rose-800 text-rose-300 rounded text-xs">🗑️</button>` : ''}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateNcrInlineField(idx, field, val) {
+      ncrList[idx][field] = val;
+      persistAllData();
+    }
+
+    function openNcrModal(editIdx = -1) {
+      document.getElementById('ncrEditIndex').value = editIdx;
+      document.getElementById('ncrDeptSelect').innerHTML = buildLocationOptions(officialDepartments[0]);
+      document.getElementById('ncrRespSelect').innerHTML = buildOfficerOptions(fieldInspectors[0]?.name);
+      document.getElementById('ncrPhotoInput').value = "";
+
+      if (editIdx >= 0 && ncrList[editIdx]) {
+        const item = ncrList[editIdx];
+        document.getElementById('ncrDeptSelect').value = item.dept;
+        document.getElementById('ncrRiskSelect').value = item.risk;
+        document.getElementById('ncrDescInput').value = item.desc;
+        document.getElementById('ncrRespSelect').value = item.responsible;
+        document.getElementById('ncrDueDateInput').value = item.dueDate;
+        document.getElementById('ncrStatusSelect').value = item.status;
+      } else {
+        document.getElementById('ncrDescInput').value = "";
+        document.getElementById('ncrDueDateInput').value = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
+        document.getElementById('ncrStatusSelect').value = "Open";
+      }
+      document.getElementById('ncrModal').classList.remove('hidden');
+    }
+
+    function closeNcrModal() { document.getElementById('ncrModal').classList.add('hidden'); }
+
+    function readPhotoAsBase64(fileInput, callback) {
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) { callback(e.target.result); };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        callback(null);
+      }
+    }
+
+    function saveNcrForm() {
+      const editIdx = parseInt(document.getElementById('ncrEditIndex').value);
+      const dept = document.getElementById('ncrDeptSelect').value;
+      const risk = document.getElementById('ncrRiskSelect').value;
+      const desc = document.getElementById('ncrDescInput').value.trim();
+      const responsible = document.getElementById('ncrRespSelect').value;
+      const dueDate = document.getElementById('ncrDueDateInput').value;
+      const status = document.getElementById('ncrStatusSelect').value;
+      const photoInput = document.getElementById('ncrPhotoInput');
+
+      if (!desc) { showToast("يرجى كتابة وصف الملاحظة.", true); return; }
+
+      readPhotoAsBase64(photoInput, (base64Img) => {
+        if (editIdx >= 0 && ncrList[editIdx]) {
+          ncrList[editIdx] = {
+            ...ncrList[editIdx],
+            dept, risk, desc, responsible, dueDate, status,
+            photo: base64Img || ncrList[editIdx].photo || ""
+          };
+        } else {
+          ncrList.unshift({
+            id: `NCR-${String(ncrList.length + 1).padStart(3, '0')}`,
+            dept, risk, desc, responsible, dueDate, status,
+            photo: base64Img || ""
+          });
+        }
+        persistAllData();
+        renderAllViews();
+        closeNcrModal();
+      });
+    }
+
+    function toggleNcrStatus(idx) {
+      const ncr = ncrList[idx];
+      if (!ncr) return;
+      if (ncr.status !== "Closed") {
+        ncr.status = "Closed";
+        const off = fieldInspectors.find(u => u.name === ncr.responsible);
+        if (off) {
+          if (!officersKpis[off.id]) officersKpis[off.id] = { inspections: 0, ncrsClosed: 0, drills: 0 };
+          officersKpis[off.id].ncrsClosed += 1;
+        }
+      } else {
+        ncr.status = "Open";
+      }
+      persistAllData();
+      renderAllViews();
+    }
+
+    function deleteNcrItem(idx) {
+      ncrList.splice(idx, 1);
+      persistAllData();
+      renderAllViews();
+    }
+
+    // ================= 5. WORK INCIDENTS LOG =================
+    function renderIncidentsTable() {
+      const tbody = document.getElementById('incidentsTableBody');
+      if (!tbody) return;
+      const canEdit = isMasterAdmin();
+      if (!incidentsList || incidentsList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-emerald-400 font-bold">🛡️ بيئة عمل آمنة - سجل خالي من الحوادث (Zero Accidents) - اضغط على (➕ تسجيل حادث) عند الحاجة.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = incidentsList.map((inc, idx) => `
+        <tr class="border-b border-slate-800 hover:bg-slate-800/40">
+          <td class="p-2">
+            ${canEdit ? `<input type="text" value="${inc.id}" onchange="updateIncidentInlineField(${idx}, 'id', this.value)" class="editable-input font-mono font-bold text-amber-400 w-24 text-xs">` : `<span class="font-mono font-bold text-amber-400">${inc.id}</span>`}
+          </td>
+          <td class="p-2">
+            ${canEdit ? `<input type="text" value="${inc.dateTime}" onchange="updateIncidentInlineField(${idx}, 'dateTime', this.value)" class="editable-input font-mono text-[11px] w-36">` : `<span class="font-mono">${inc.dateTime}</span>`}
+          </td>
+          <td class="p-2 space-y-1">
+            ${canEdit ? `
+              <input type="text" value="${inc.person}" onchange="updateIncidentInlineField(${idx}, 'person', this.value)" class="editable-input font-bold text-white w-full text-xs">
+              <input type="text" value="${inc.job}" onchange="updateIncidentInlineField(${idx}, 'job', this.value)" class="editable-input text-[10px] text-teal-300 w-full">`
+            : `<div class="font-bold text-white">${inc.person}</div><div class="text-[10px] text-teal-300">${inc.job}</div>`}
+          </td>
+          <td class="p-2">
+            ${canEdit ? `<input type="text" value="${inc.type}" onchange="updateIncidentInlineField(${idx}, 'type', this.value)" class="editable-input text-amber-300 font-bold text-xs w-40">` : `<span class="text-amber-300 font-bold">${inc.type}</span>`}
+          </td>
+          <td class="p-2">
+            ${canEdit ? `<select onchange="updateIncidentInlineField(${idx}, 'location', this.value)" class="editable-input font-inter text-xs w-36">${buildLocationOptions(inc.location)}</select>` : `<span class="font-inter">📍 ${inc.location}</span>`}
+          </td>
+          <td class="p-2 text-center">${inc.photo ? `<img src="${inc.photo}" class="w-10 h-10 object-cover rounded border border-slate-600 mx-auto">` : '<span class="text-[10px] text-slate-500">بدون صورة</span>'}</td>
+          <td class="p-2 text-center">
+            ${canEdit ? `<input type="number" min="0" value="${inc.lostDays}" onchange="updateIncidentInlineField(${idx}, 'lostDays', this.value)" class="editable-input text-center font-bold text-emerald-400 w-16 text-xs">` : `<span class="font-bold text-emerald-400">${inc.lostDays}</span>`}
+          </td>
+          <td class="p-2 text-center">
+            <div class="flex items-center justify-center gap-1">
+              <button onclick="openIncidentModal(${idx})" title="إرفاق / تعديل الصورة" class="p-1 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded text-xs">📷</button>
+              ${canEdit ? `<button onclick="deleteIncidentItem(${idx})" class="p-1 bg-rose-950 hover:bg-rose-800 text-rose-300 rounded text-xs">🗑️</button>` : ''}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateIncidentInlineField(idx, field, val) {
+      incidentsList[idx][field] = val;
+      persistAllData();
+    }
+
+    function openIncidentModal(editIdx = -1) {
+      document.getElementById('incidentEditIndex').value = editIdx;
+      document.getElementById('incLocSelect').innerHTML = buildLocationOptions(officialDepartments[0]);
+      document.getElementById('incPhotoInput').value = "";
+
+      if (editIdx >= 0 && incidentsList[editIdx]) {
+        const inc = incidentsList[editIdx];
+        document.getElementById('incPersonInput').value = inc.person;
+        document.getElementById('incJobInput').value = inc.job;
+        document.getElementById('incLocSelect').value = inc.location;
+        document.getElementById('incTypeSelect').value = inc.type;
+        document.getElementById('incDateTimeInput').value = inc.dateTime;
+        document.getElementById('incLostDaysInput').value = inc.lostDays;
+      } else {
+        document.getElementById('incPersonInput').value = "";
+        document.getElementById('incJobInput').value = "";
+        document.getElementById('incDateTimeInput').value = new Date().toISOString().slice(0, 16).replace('T', ' ');
+        document.getElementById('incLostDaysInput').value = 0;
+      }
+      document.getElementById('incidentModal').classList.remove('hidden');
+    }
+
+    function closeIncidentModal() { document.getElementById('incidentModal').classList.add('hidden'); }
+
+    function saveIncidentForm() {
+      const editIdx = parseInt(document.getElementById('incidentEditIndex').value);
+      const person = document.getElementById('incPersonInput').value.trim();
+      const job = document.getElementById('incJobInput').value.trim() || "غير محدد";
+      const location = document.getElementById('incLocSelect').value;
+      const type = document.getElementById('incTypeSelect').value;
+      const dateTime = document.getElementById('incDateTimeInput').value.trim();
+      const lostDays = parseInt(document.getElementById('incLostDaysInput').value) || 0;
+      const photoInput = document.getElementById('incPhotoInput');
+
+      if (!person) { showToast("يرجى إدخال اسم المصاب.", true); return; }
+
+      readPhotoAsBase64(photoInput, (base64Img) => {
+        if (editIdx >= 0 && incidentsList[editIdx]) {
+          incidentsList[editIdx] = {
+            ...incidentsList[editIdx],
+            person, job, location, type, dateTime, lostDays,
+            photo: base64Img || incidentsList[editIdx].photo || ""
+          };
+        } else {
+          incidentsList.unshift({
+            id: `INC-${String(incidentsList.length + 1).padStart(3, '0')}`,
+            person, job, location, type, dateTime, lostDays,
+            photo: base64Img || ""
+          });
+        }
+        persistAllData();
+        renderAllViews();
+        closeIncidentModal();
+      });
+    }
+
+    function deleteIncidentItem(idx) {
+      incidentsList.splice(idx, 1);
+      persistAllData();
+      renderAllViews();
+    }
+
+    // ================= 6. KPIs MATRIX & INSPECTION LOGS =================
+    function calculateOfficerCompliance(kpi) {
+      const ins = Number(kpi.inspections || 0);
+      const ncrs = Number(kpi.ncrsClosed || 0);
+      const drills = Number(kpi.drills || 0);
+      if (ins === 0 && ncrs === 0 && drills === 0) return 0;
+      return Math.min(100, Math.round(((ins * 10) + (ncrs * 8) + (drills * 15)) / 1.5));
+    }
+
+    function renderKpisTable() {
+      const tbody = document.getElementById('kpisTableBody');
+      if (!tbody) return;
+      syncKpiKeysWithTeam();
+      const canEdit = isMasterAdmin();
+
+      tbody.innerHTML = fieldInspectors.map((officer, index) => {
+        const kpi = officersKpis[officer.id] || { inspections: 0, ncrsClosed: 0, drills: 0 };
+        const score = calculateOfficerCompliance(kpi);
+
+        return `
+          <tr class="border-b border-slate-800 hover:bg-slate-800/40">
+            <td class="p-3 text-center text-slate-400 font-bold">${index + 1}</td>
+            <td class="p-2">
+              ${canEdit ? `<input type="text" value="${officer.name}" onchange="updateMemberInline(${officer.id}, 'name', this.value)" class="editable-input font-bold text-white text-xs w-44">` : `<span class="font-bold text-white">${officer.name}</span>`}
+            </td>
+            <td class="p-2">
+              ${canEdit ? `<input type="text" value="${officer.role}" onchange="updateMemberInline(${officer.id}, 'role', this.value)" class="editable-input font-semibold text-teal-400 font-inter text-xs w-36">` : `<span class="text-teal-400 font-inter">${officer.role}</span>`}
+            </td>
+            <td class="p-2 text-center">
+              ${canEdit ? `<input type="number" min="0" value="${kpi.inspections}" onchange="updateOfficerKpi(${officer.id}, 'inspections', this.value)" class="w-16 bg-slate-900 border border-teal-700 rounded-lg p-1.5 text-center text-xs text-teal-300 font-bold outline-none">` : `<span class="font-bold text-teal-300">${kpi.inspections}</span>`}
+            </td>
+            <td class="p-2 text-center">
+              ${canEdit ? `<input type="number" min="0" value="${kpi.ncrsClosed}" onchange="updateOfficerKpi(${officer.id}, 'ncrsClosed', this.value)" class="w-16 bg-slate-900 border border-blue-700 rounded-lg p-1.5 text-center text-xs text-blue-300 font-bold outline-none">` : `<span class="font-bold text-blue-300">${kpi.ncrsClosed}</span>`}
+            </td>
+            <td class="p-2 text-center">
+              ${canEdit ? `<input type="number" min="0" value="${kpi.drills}" onchange="updateOfficerKpi(${officer.id}, 'drills', this.value)" class="w-16 bg-slate-900 border border-amber-700 rounded-lg p-1.5 text-center text-xs text-amber-300 font-bold outline-none">` : `<span class="font-bold text-amber-300">${kpi.drills}</span>`}
+            </td>
+            <td class="p-3 text-center font-black text-white">${score}%</td>
+            <td class="p-3 text-center"><span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${score >= 85 ? 'bg-emerald-500/20 text-emerald-300' : (score >= 50 ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-700 text-slate-300')}">${score >= 85 ? 'ممتاز ★★★' : (score >= 50 ? 'جيد جداً ★★' : 'قيد التقييم')}</span></td>
+            ${canEdit ? `
+            <td class="p-3 text-center">
+              <div class="flex items-center justify-center gap-1">
+                <button onclick="deleteOfficerKpiData(${officer.id})" class="px-2 py-1 bg-amber-950 hover:bg-amber-900 text-amber-300 rounded text-[10px]">تصفير</button>
+                <button onclick="handleDeleteMember(${officer.id})" class="px-2 py-1 bg-rose-950 hover:bg-rose-900 text-rose-300 rounded text-[10px]">🗑️</button>
+              </div>
+            </td>` : ''}
+          </tr>
+        `;
+      }).join('');
+
+      const logsBody = document.getElementById('inspectionLogsTableBody');
+      if (logsBody) {
+        if (!inspectionLogsList || inspectionLogsList.length === 0) {
+          logsBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">لم يتم تسجيل جولات فحص ميدانية بعد - عند إجراء أي فحص سيظهر هنا ويرتبط بالـ KPIs مباشرة.</td></tr>`;
+        } else {
+          logsBody.innerHTML = inspectionLogsList.slice(0, 20).map(log => `
+            <tr class="border-b border-slate-800">
+              <td class="p-2.5 font-mono text-slate-400">${log.dateTime}</td>
+              <td class="p-2.5 font-bold text-white font-inter">📍 ${log.dept}</td>
+              <td class="p-2.5 text-teal-300 font-bold">👤 ${log.officer}</td>
+              <td class="p-2.5 text-center font-black text-emerald-400">${log.score}%</td>
+              <td class="p-2.5 text-center text-rose-300 font-bold">${log.ncrsCount} ملاحظات</td>
+            </tr>
+          `).join('');
+        }
+      }
+    }
+
+    function updateOfficerKpi(officerId, field, val) {
+      if (!officersKpis[officerId]) officersKpis[officerId] = { inspections: 0, ncrsClosed: 0, drills: 0 };
+      officersKpis[officerId][field] = Math.max(0, parseInt(val) || 0);
+      persistAllData();
+      renderKpisTable();
+    }
+
+    function deleteOfficerKpiData(officerId) {
+      officersKpis[officerId] = { inspections: 0, ncrsClosed: 0, drills: 0 };
+      persistAllData();
+      renderKpisTable();
+    }
+
+    function resetAllKpisToZero() {
+      fieldInspectors.forEach(off => { officersKpis[off.id] = { inspections: 0, ncrsClosed: 0, drills: 0 }; });
+      persistAllData();
+      renderKpisTable();
+      showToast("تم تصفير كافة المؤشرات بنجاح 🔄");
+    }
+
+    // ================= 6.5 UNIFIED PLAN (INSPECTIONS + DRILLS + TRAINING) =================
+    function renderUnifiedPlanView() {
+      let totalInspections = 0;
+      (weeklySchedule || []).forEach(d => {
+        totalInspections += (d.morningUnits?.length || 0) + (d.nightUnits?.length || 0);
+      });
+      const elIns = document.getElementById('unifiedCountInspections');
+      const elDrills = document.getElementById('unifiedCountDrills');
+      const elTrain = document.getElementById('unifiedCountTrainings');
+      if (elIns) elIns.textContent = totalInspections;
+      if (elDrills) elDrills.textContent = (activitiesList || []).length;
+      if (elTrain) elTrain.textContent = (trainingsList || []).length;
+
+      const insSummary = document.getElementById('unifiedInspectionsSummary');
+      if (insSummary) {
+        insSummary.innerHTML = (weeklySchedule || []).map((d, dIdx) => {
+          const dInfo = getActualDateForDayName(d.day, dIdx);
+          return `
+          <div class="card-glass p-3 rounded-xl border ${dInfo.isToday ? 'border-teal-500' : 'border-slate-700/80'} space-y-1.5 text-xs">
+            <div class="font-black text-white border-b border-slate-700 pb-1 flex items-center justify-between">
+              <span>📅 ${d.day}</span>
+              <span class="text-[10px] text-teal-300 font-mono">${dInfo.numeric}</span>
+            </div>
+            <div class="text-[11px] text-amber-300">☀️ صباحي: ${(d.morningUnits || []).map(u => `${u.location} (${u.officer})`).join(' ، ')}</div>
+            <div class="text-[11px] text-indigo-300">🌙 مسائي: ${(d.nightUnits || []).map(u => `${u.location} (${u.officer})`).join(' ، ')}</div>
+          </div>
+        `;
+        }).join('');
+      }
+
+      const drillsSummary = document.getElementById('unifiedDrillsSummary');
+      if (drillsSummary) {
+        drillsSummary.innerHTML = (activitiesList || []).map(a => `
+          <div class="card-glass p-3 rounded-xl border border-slate-700/80 flex items-center justify-between text-xs">
+            <div>
+              <div class="font-bold text-rose-300">${a.title}</div>
+              <div class="text-[11px] text-slate-300 mt-0.5">📍 ${a.dept} &bull; 👤 ${a.trainer}</div>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] font-bold text-teal-300">${a.status}</span>
+          </div>
+        `).join('');
+      }
+
+      const trainBody = document.getElementById('trainingsTableBody');
+      const canEdit = isMasterAdmin();
+      if (trainBody) {
+        if (!trainingsList || trainingsList.length === 0) {
+          trainBody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">لا توجد تدريبات مضافة حالياً.</td></tr>`;
+        } else {
+          trainBody.innerHTML = trainingsList.map((tr, idx) => `
+            <tr class="border-b border-slate-800 hover:bg-slate-800/40">
+              <td class="p-2.5 font-bold text-indigo-300">${tr.topic}</td>
+              <td class="p-2.5 font-inter font-bold text-white">📍 ${tr.dept}</td>
+              <td class="p-2.5 text-teal-300">👤 ${tr.trainer}</td>
+              <td class="p-2.5 text-center font-bold">${tr.attendees} متدرب</td>
+              <td class="p-2.5 font-mono text-slate-400">${tr.date}</td>
+              <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${tr.status.includes('تم') ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">${tr.status}</span></td>
+              <td class="p-2.5 text-center">
+                <div class="flex items-center justify-center gap-1">
+                  <button onclick="completeTrainingItem(${idx})" class="px-2 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded text-[10px] font-bold">✓ تم التنفيذ</button>
+                  ${canEdit ? `<button onclick="deleteTrainingItem(${idx})" class="p-1 bg-rose-950 text-rose-300 rounded text-xs">🗑️</button>` : ''}
+                </div>
+              </td>
+            </tr>
+          `).join('');
+        }
+      }
+    }
+
+    function openTrainingModal() {
+      document.getElementById('trainingDeptSelect').innerHTML = buildLocationOptions(officialDepartments[0]);
+      document.getElementById('trainingTrainerSelect').innerHTML = buildOfficerOptions(fieldInspectors[0]?.name);
+      document.getElementById('trainingDateInput').value = new Date().toISOString().split('T')[0];
+      document.getElementById('trainingTopicInput').value = "";
+      document.getElementById('trainingModal').classList.remove('hidden');
+    }
+
+    function closeTrainingModal() { document.getElementById('trainingModal').classList.add('hidden'); }
+
+    function saveTrainingForm() {
+      const topic = document.getElementById('trainingTopicInput').value.trim();
+      const dept = document.getElementById('trainingDeptSelect').value;
+      const trainer = document.getElementById('trainingTrainerSelect').value;
+      const attendees = parseInt(document.getElementById('trainingAttendeesInput').value) || 10;
+      const date = document.getElementById('trainingDateInput').value;
+      if (!topic) { showToast("يرجى إدخال موضوع التدريب.", true); return; }
+      trainingsList.unshift({ id: Date.now(), topic, dept, trainer, attendees, date, status: "مجدول ⏳" });
+      persistAllData();
+      renderAllViews();
+      closeTrainingModal();
+      showToast("✅ تمت إضافة التدريب الميداني للخطة المجمعة!");
+    }
+
+    function completeTrainingItem(idx) {
+      const tr = trainingsList[idx];
+      if (!tr) return;
+      tr.status = "تم التنفيذ ✓";
+      const off = fieldInspectors.find(u => u.name === tr.trainer);
+      if (off) {
+        if (!officersKpis[off.id]) officersKpis[off.id] = { inspections: 0, ncrsClosed: 0, drills: 0 };
+        officersKpis[off.id].drills += 1;
+      }
+      persistAllData();
+      renderAllViews();
+      showToast("🎓 تم اعتماد تنفيذ التدريب وإضافته لمؤشر KPIs للمفتش!");
+    }
+
+    function deleteTrainingItem(idx) {
+      trainingsList.splice(idx, 1);
+      persistAllData();
+      renderAllViews();
+    }
+
+    // ================= 7. TEAM MANAGEMENT =================
+    function renderTeamCards() {
+      const container = document.getElementById('teamCardsGrid');
+      if (!container) return;
+      const canEdit = isMasterAdmin();
+      container.innerHTML = (activeTeam || []).map(member => `
+        <div class="card-glass p-4 rounded-xl border border-slate-700/80 flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl ${member.isManager ? 'bg-amber-600' : (member.isLeader ? 'bg-indigo-600' : 'bg-teal-600')} flex items-center justify-center text-white font-bold text-sm">${member.name.charAt(0)}</div>
+                <div>
+                  <h4 class="text-xs font-bold text-white">${member.name}</h4>
+                  <p class="text-[10px] text-teal-400 font-inter font-semibold">${member.role}</p>
+                </div>
+              </div>
+              ${canEdit ? `
+              <div class="flex items-center gap-1">
+                <button onclick="openMemberModal(${member.id})" class="px-2 py-1 bg-slate-800 hover:bg-teal-700 text-teal-300 hover:text-white rounded text-[10px] font-bold border border-slate-700">✏️ تعديل</button>
+                ${!member.isManager ? `<button onclick="handleDeleteMember(${member.id})" class="p-1 bg-rose-950/70 hover:bg-rose-800 text-rose-300 rounded text-[10px] border border-rose-800">🗑️</button>` : ''}
+              </div>` : ''}
+            </div>
+            <div class="mt-3 text-[11px] text-slate-400 font-mono" dir="ltr">📱 ${member.phone || ''}</div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
+            <span class="text-[10px] text-teal-300">مرتبط بـ KPIs والسحابة ✓</span>
+            ${member.isManager ? '<span class="px-2 py-0.5 rounded text-[9px] font-black bg-amber-500/20 text-amber-300">Owner / المدير 👑</span>' : ''}
+            ${member.isLeader ? '<span class="px-2 py-0.5 rounded text-[9px] font-black bg-indigo-500/20 text-indigo-300">Team Leader 🛡️</span>' : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateMemberInline(memberId, field, val) {
+      const m = activeTeam.find(u => String(u.id) === String(memberId));
+      if (!m) return;
+      const oldName = m.name;
+      m[field] = val;
+      if (field === 'name' && oldName !== val) {
+        (weeklySchedule || []).forEach(d => {
+          (d.morningUnits || []).forEach(u => { if (u.officer === oldName) u.officer = val; });
+          (d.nightUnits || []).forEach(u => { if (u.officer === oldName) u.officer = val; });
+        });
+      }
+      persistAllData();
+      refreshFieldInspectors();
+      renderAllViews();
+    }
+
+    function openMemberModal(memberId = -1) {
+      document.getElementById('memberEditId').value = memberId;
+      if (memberId !== -1) {
+        const m = activeTeam.find(u => String(u.id) === String(memberId));
+        if (m) {
+          document.getElementById('modalMemberName').value = m.name;
+          document.getElementById('modalMemberRole').value = m.role;
+          document.getElementById('modalMemberPhone').value = m.phone || "";
+          document.getElementById('modalMemberPass').value = getStoredPassword(m.id);
+        }
+      } else {
+        document.getElementById('modalMemberName').value = "";
+        document.getElementById('modalMemberRole').value = "Officer";
+        document.getElementById('modalMemberPhone').value = "2010";
+        document.getElementById('modalMemberPass').value = "123";
+      }
+      document.getElementById('memberModal').classList.remove('hidden');
+    }
+
+    function closeMemberModal() { document.getElementById('memberModal').classList.add('hidden'); }
+
+    function handleSaveMember() {
+      const editId = parseInt(document.getElementById('memberEditId').value);
+      const name = document.getElementById('modalMemberName').value.trim();
+      const role = document.getElementById('modalMemberRole').value.trim() || "Officer";
+      const phone = document.getElementById('modalMemberPhone').value.trim();
+      const pass = document.getElementById('modalMemberPass').value.trim() || "123";
+      if (!name) return;
+
+      if (editId !== -1) {
+        const m = activeTeam.find(u => u.id === editId);
+        if (m) {
+          m.name = name; m.role = role; m.phone = phone; m.password = pass;
+          setStoredPassword(m.id, pass);
+        }
+      } else {
+        const newId = Date.now();
+        activeTeam.push({ id: newId, name, role, phone, isLeader: false, isManager: false, password: pass });
+        setStoredPassword(newId, pass);
+        officersKpis[newId] = { inspections: 0, ncrsClosed: 0, drills: 0 };
+      }
+      persistAllData();
+      refreshFieldInspectors();
+      syncKpiKeysWithTeam();
+      renderAllViews();
+      closeMemberModal();
+    }
+
+    function handleDeleteMember(id) {
+      const target = activeTeam.find(u => u.id === id);
+      if (!target || target.isManager) return;
+      activeTeam = activeTeam.filter(u => u.id !== id);
+      delete officersKpis[id];
+      persistAllData();
+      refreshFieldInspectors();
+      renderAllViews();
+    }
+
+    // ================= 8. PRINTABLE REPORTS ENGINE =================
+    function buildTableScheduleHtml() {
+      const rows = (weeklySchedule || []).map((item, idx) => {
+        const dInfo = getActualDateForDayName(item.day, idx);
+        return `
+        <tr style="border-bottom: 1px solid #cbd5e1;">
+          <td style="padding: 7px; font-weight: bold; background: #f8fafc; border: 1px solid #cbd5e1; text-align: center;">
+            <div>${item.day || ''}</div>
+            <div style="font-size: 9px; color: #0f766e; font-weight: normal;">${dInfo.formattedAr} (${dInfo.numeric})</div>
+          </td>
+          <td style="padding: 7px; border: 1px solid #cbd5e1;">${(item.morningUnits || []).map(u => `<b>${u.location}</b> (${u.officer})`).join(' &bull; ')}</td>
+          <td style="padding: 7px; border: 1px solid #cbd5e1;">${(item.nightUnits || []).map(u => `<b>${u.location}</b> (${u.officer})`).join(' &bull; ')}</td>
+        </tr>
+      `;
+      }).join('');
+      return `
+        <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;">
+          <thead>
+            <tr style="background: #0f766e; color: #ffffff;">
+              <th style="padding: 8px; border: 1px solid #0f766e; width: 18%; text-align: center;">اليوم والتاريخ الفعلي</th>
+              <th style="padding: 8px; border: 1px solid #0f766e; width: 41%;">☀️ الشفت الصباحي (08:00 AM - 08:00 PM)</th>
+              <th style="padding: 8px; border: 1px solid #0f766e; width: 41%;">🌙 الشفت المسائي (08:00 PM - 08:00 AM)</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    function buildTableNcrHtml() {
+      const rows = (ncrList || []).map(ncr => `
+        <tr style="border-bottom: 1px solid #cbd5e1;">
+          <td style="padding: 6px; border: 1px solid #cbd5e1; font-weight: bold;">${ncr.id}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; font-weight: bold;">${ncr.dept}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${ncr.desc}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${ncr.photo ? `<img src="${ncr.photo}" style="width:45px;height:45px;object-fit:cover;">` : '-'}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${ncr.risk}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${ncr.responsible}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${ncr.dueDate}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold;">${ncr.status}</td>
+        </tr>
+      `).join('') || `<tr><td colspan="8" style="padding: 12px; text-align: center; border: 1px solid #cbd5e1;">لا توجد حالات عدم مطابقة مسجلة</td></tr>`;
+      return `
+        <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;">
+          <thead>
+            <tr style="background: #be123c; color: #ffffff;">
+              <th style="padding: 8px; border: 1px solid #be123c;">رقم NCR</th>
+              <th style="padding: 8px; border: 1px solid #be123c;">القسم</th>
+              <th style="padding: 8px; border: 1px solid #be123c;">وصف عدم المطابقة</th>
+              <th style="padding: 8px; border: 1px solid #be123c;">الصورة</th>
+              <th style="padding: 8px; border: 1px solid #be123c;">الخطورة</th>
+              <th style="padding: 8px; border: 1px solid #be123c;">المسؤول</th>
+              <th style="padding: 8px; border: 1px solid #be123c;">المهلة</th>
+              <th style="padding: 8px; border: 1px solid #be123c;">الحالة</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    function buildTableIncidentsHtml() {
+      const rows = (incidentsList || []).map(inc => `
+        <tr style="border-bottom: 1px solid #cbd5e1;">
+          <td style="padding: 6px; border: 1px solid #cbd5e1; font-weight: bold;">${inc.id}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${inc.dateTime}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;"><b>${inc.person}</b> (${inc.job})</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${inc.type}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${inc.location}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${inc.photo ? `<img src="${inc.photo}" style="width:45px;height:45px;object-fit:cover;">` : '-'}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold;">${inc.lostDays} يوم</td>
+        </tr>
+      `).join('') || `<tr><td colspan="7" style="padding: 12px; text-align: center; border: 1px solid #cbd5e1; color: #15803d; font-weight: bold;">🛡️ سجل خالي من الحوادث والإصابات (Zero Accidents)</td></tr>`;
+      return `
+        <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;">
+          <thead>
+            <tr style="background: #b45309; color: #ffffff;">
+              <th style="padding: 8px; border: 1px solid #b45309;">رقم الحادث</th>
+              <th style="padding: 8px; border: 1px solid #b45309;">التاريخ والوقت</th>
+              <th style="padding: 8px; border: 1px solid #b45309;">المصاب / الوظيفة</th>
+              <th style="padding: 8px; border: 1px solid #b45309;">نوع الإصابة</th>
+              <th style="padding: 8px; border: 1px solid #b45309;">الموقع</th>
+              <th style="padding: 8px; border: 1px solid #b45309;">الصورة</th>
+              <th style="padding: 8px; border: 1px solid #b45309;">أيام الغياب</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    function buildTableKpisHtml() {
+      const rows = (fieldInspectors || []).map((off, idx) => {
+        const kpi = officersKpis[off.id] || { inspections: 0, ncrsClosed: 0, drills: 0 };
+        const score = calculateOfficerCompliance(kpi);
+        return `
+          <tr style="border-bottom: 1px solid #cbd5e1;">
+            <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${idx + 1}</td>
+            <td style="padding: 6px; border: 1px solid #cbd5e1; font-weight: bold;">${off.name}</td>
+            <td style="padding: 6px; border: 1px solid #cbd5e1;">${off.role}</td>
+            <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold;">${kpi.inspections}</td>
+            <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold;">${kpi.ncrsClosed}</td>
+            <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold;">${kpi.drills}</td>
+            <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold; color: #0f766e;">${score}%</td>
+          </tr>
+        `;
+      }).join('');
+      return `
+        <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;">
+          <thead>
+            <tr style="background: #0f766e; color: #ffffff;">
+              <th style="padding: 8px; border: 1px solid #0f766e; text-align: center;">م</th>
+              <th style="padding: 8px; border: 1px solid #0f766e;">اسم المفتش</th>
+              <th style="padding: 8px; border: 1px solid #0f766e;">المسمى الوظيفي</th>
+              <th style="padding: 8px; border: 1px solid #0f766e; text-align: center;">جولات منجزة</th>
+              <th style="padding: 8px; border: 1px solid #0f766e; text-align: center;">NCRs مغلقة</th>
+              <th style="padding: 8px; border: 1px solid #0f766e; text-align: center;">دريلات وتدريب</th>
+              <th style="padding: 8px; border: 1px solid #0f766e; text-align: center;">نسبة الامتثال</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    function buildTableDrillsHtml() {
+      const rows = (activitiesList || []).map(a => `
+        <tr style="border-bottom: 1px solid #cbd5e1;">
+          <td style="padding: 6px; border: 1px solid #cbd5e1; font-weight: bold;">${a.title}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${a.dept}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${a.trainer}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${a.date}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold;">${a.status}</td>
+        </tr>
+      `).join('');
+      return `
+        <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;">
+          <thead>
+            <tr style="background: #1e40af; color: #ffffff;">
+              <th style="padding: 8px; border: 1px solid #1e40af;">كود الطوارئ / الدريل</th>
+              <th style="padding: 8px; border: 1px solid #1e40af;">القسم</th>
+              <th style="padding: 8px; border: 1px solid #1e40af;">المكلف بالتنفيذ</th>
+              <th style="padding: 8px; border: 1px solid #1e40af; text-align: center;">التاريخ</th>
+              <th style="padding: 8px; border: 1px solid #1e40af; text-align: center;">الحالة</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    function buildTableTrainingsHtml() {
+      const rows = (trainingsList || []).map(tr => `
+        <tr style="border-bottom: 1px solid #cbd5e1;">
+          <td style="padding: 6px; border: 1px solid #cbd5e1; font-weight: bold;">${tr.topic}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${tr.dept}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${tr.trainer}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${tr.attendees}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${tr.date}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold;">${tr.status}</td>
+        </tr>
+      `).join('') || `<tr><td colspan="6" style="padding: 10px; text-align: center; border: 1px solid #cbd5e1;">لا توجد تدريبات مسجلة</td></tr>`;
+      return `<table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;"><thead><tr style="background: #4338ca; color: #fff;"><th style="padding: 8px; border: 1px solid #4338ca;">موضوع التدريب</th><th style="padding: 8px; border: 1px solid #4338ca;">القسم</th><th style="padding: 8px; border: 1px solid #4338ca;">المدرب</th><th style="padding: 8px; border: 1px solid #4338ca; text-align: center;">المتدربين</th><th style="padding: 8px; border: 1px solid #4338ca; text-align: center;">التاريخ</th><th style="padding: 8px; border: 1px solid #4338ca; text-align: center;">الحالة</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+
+    function buildTableInspectionLogsHtml() {
+      const rows = (inspectionLogsList || []).map(l => `
+        <tr style="border-bottom: 1px solid #cbd5e1;">
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${l.dateTime}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; font-weight: bold;">${l.dept}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${l.officer}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold; color: #0f766e;">${l.score}%</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${l.ncrsCount}</td>
+        </tr>
+      `).join('') || `<tr><td colspan="5" style="padding: 10px; text-align: center; border: 1px solid #cbd5e1;">لم تُسجل جولات فحص بعد</td></tr>`;
+      return `<table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;"><thead><tr style="background: #0d9488; color: #fff;"><th style="padding: 8px; border: 1px solid #0d9488;">التاريخ والوقت</th><th style="padding: 8px; border: 1px solid #0d9488;">القسم</th><th style="padding: 8px; border: 1px solid #0d9488;">المفتش</th><th style="padding: 8px; border: 1px solid #0d9488; text-align: center;">نسبة الامتثال</th><th style="padding: 8px; border: 1px solid #0d9488; text-align: center;">ملاحظات مرصودة</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+
+    function generateAndOpenReportPreview(type = 'weekly') {
+      const container = document.getElementById('printPreviewContent');
+      const nowStr = new Intl.DateTimeFormat('ar-EG', { dateStyle: 'full' }).format(new Date());
+
+      let reportTitle = "التقرير الرسمي المعتمد";
+      let bodyHtml = "";
+
+      if (type === 'weekly') {
+        reportTitle = "التقرير الأسبوعي لخطط المرور الميداني والورديات (12 ساعة)";
+        bodyHtml = buildTableScheduleHtml();
+      } else if (type === 'unified_plan_report') {
+        reportTitle = "تقرير الخطة التنفيذية المجمعة (الفحوصات + الدريلات + التدريب الميداني)";
+        bodyHtml = `
+          <h4 style="font-size: 12px; font-weight: 900; color: #0f766e; margin: 10px 0 6px;">أولاً: جدول خطة المرور والتفتيش الميداني الأسبوعي:</h4>
+          ${buildTableScheduleHtml()}
+          <h4 style="font-size: 12px; font-weight: 900; color: #1e40af; margin: 15px 0 6px;">ثانياً: خطة أكواد الطوارئ والدريلات (Drills):</h4>
+          ${buildTableDrillsHtml()}
+          <h4 style="font-size: 12px; font-weight: 900; color: #4338ca; margin: 15px 0 6px;">ثالثاً: خطة التدريبات الميدانية المطلوبة (Trainings):</h4>
+          ${buildTableTrainingsHtml()}
+        `;
+      } else if (type === 'ncr_report') {
+        reportTitle = "تقرير سجل حالات عدم المطابقة والملاحظات الميدانية (NCRs Report)";
+        bodyHtml = buildTableNcrHtml();
+      } else if (type === 'incidents_report') {
+        reportTitle = "تقرير سجل حوادث وإصابات بيئة العمل (Zero Accidents Log Report)";
+        bodyHtml = buildTableIncidentsHtml();
+      } else if (type === 'individual') {
+        reportTitle = "تقرير مصفوفة تقييم مؤشرات أداء المفتشين وسجل الفحوصات المنفذة (KPIs)";
+        bodyHtml = `
+          <h4 style="font-size: 12px; font-weight: 900; color: #0f766e; margin: 10px 0 6px;">أولاً: مصفوفة تقييم أداء المفتشين (KPIs Matrix):</h4>
+          ${buildTableKpisHtml()}
+          <h4 style="font-size: 12px; font-weight: 900; color: #0d9488; margin: 15px 0 6px;">ثانياً: سجل نتائج الفحوصات الميدانية الفعلية المنفذة:</h4>
+          ${buildTableInspectionLogsHtml()}
+        `;
+      } else if (type === 'drills_report') {
+        reportTitle = "تقرير الخطة الشهرية لأكواد الطوارئ والدريلات والتدريب الميداني";
+        bodyHtml = buildTableDrillsHtml() + `<h4 style="font-size: 12px; font-weight: 900; color: #4338ca; margin: 15px 0 6px;">التدريبات الميدانية المنفذة والمجدولة:</h4>` + buildTableTrainingsHtml();
+      } else {
+        reportTitle = "التقرير التنفيذي الشامل العام لإدارة السلامة والصحة المهنية (Master Report)";
+        bodyHtml = `
+          <h4 style="font-size: 12px; font-weight: 900; color: #0f766e; margin: 10px 0 6px;">أولاً: جدول خطة المرور الأسبوعي:</h4>
+          ${buildTableScheduleHtml()}
+          <h4 style="font-size: 12px; font-weight: 900; color: #0f766e; margin: 15px 0 6px;">ثانياً: مصفوفة تقييم أداء المفتشين (KPIs) وسجل الفحوصات:</h4>
+          ${buildTableKpisHtml()}
+          ${buildTableInspectionLogsHtml()}
+          <h4 style="font-size: 12px; font-weight: 900; color: #be123c; margin: 15px 0 6px;">ثالثاً: سجل تقارير عدم المطابقة (NCRs Tracker):</h4>
+          ${buildTableNcrHtml()}
+          <h4 style="font-size: 12px; font-weight: 900; color: #b45309; margin: 15px 0 6px;">رابعاً: سجل الحوادث والإصابات (Work Incidents Log):</h4>
+          ${buildTableIncidentsHtml()}
+          <h4 style="font-size: 12px; font-weight: 900; color: #1e40af; margin: 15px 0 6px;">خامساً: خطة أكواد الطوارئ والدريلات والتدريب:</h4>
+          ${buildTableDrillsHtml()}
+          ${buildTableTrainingsHtml()}
+        `;
+      }
+
+      container.innerHTML = `
+        <div style="direction: rtl; color: #000; padding: 5px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0f766e; padding-bottom: 12px; margin-bottom: 16px;">
+            <div>
+              <h2 style="font-size: 16px; font-weight: 900; color: #0f766e; margin: 0;">مستشفى الناس للأطفال (Al Nas Hospital)</h2>
+              <div style="font-size: 12px; font-weight: bold; color: #1e293b; margin-top: 3px;">إدارة السلامة والصحة المهنية والبيئة (OHS & Environment Dept)</div>
+              <div style="font-size: 10px; color: #64748b;">المرجعية القياسية: معايير GAHAR 2025 / NFPA / ISO 45001</div>
+            </div>
+            <div style="font-size: 11px; text-align: left; color: #64748b;">
+              <div>تاريخ الإصدار: <b>${nowStr}</b></div>
+              <div>حالة التوثيق: <b>Firebase Live Sync ✓</b></div>
+            </div>
+          </div>
+
+          <div style="text-align: center; margin-bottom: 15px; background: #f1f5f9; padding: 8px; border-radius: 6px;">
+            <h3 style="font-size: 14px; font-weight: 900; color: #0f172a; margin: 0;">${reportTitle}</h3>
+          </div>
+
+          <div>${bodyHtml}</div>
+
+          <!-- 4-Party Executive Signatures Grid -->
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 30px; padding-top: 15px; border-top: 2px solid #0f766e; text-align: center; font-size: 11px;">
+            <div style="border: 1px dashed #cbd5e1; padding: 10px; border-radius: 6px; background: #fafafa;">
+              <div style="font-weight: 900; color: #0f172a;">م/ أحمد نبيه</div>
+              <div style="font-size: 10px; color: #0f766e; font-weight: bold;">Team Leader السلامة</div>
+              <div style="margin-top: 25px; border-bottom: 1px solid #94a3b8; width: 80%; margin: 20px auto 4px;"></div>
+              <div style="font-size: 9px; color: #94a3b8;">التوقيع والاعتماد</div>
+            </div>
+            <div style="border: 1px dashed #cbd5e1; padding: 10px; border-radius: 6px; background: #fafafa;">
+              <div style="font-weight: 900; color: #0f172a;">م/ عمر فريد العزب</div>
+              <div style="font-size: 10px; color: #0f766e; font-weight: bold;">مدير إدارة السلامة والصحة المهنية</div>
+              <div style="margin-top: 25px; border-bottom: 1px solid #94a3b8; width: 80%; margin: 20px auto 4px;"></div>
+              <div style="font-size: 9px; color: #94a3b8;">التوقيع والاعتماد</div>
+            </div>
+            <div style="border: 1px dashed #cbd5e1; padding: 10px; border-radius: 6px; background: #fafafa;">
+              <div style="font-weight: 900; color: #0f172a;">مدير التشغيل</div>
+              <div style="font-size: 10px; color: #64748b; font-weight: bold;">Operations Director</div>
+              <div style="margin-top: 25px; border-bottom: 1px solid #94a3b8; width: 80%; margin: 20px auto 4px;"></div>
+              <div style="font-size: 9px; color: #94a3b8;">التوقيع والاعتماد</div>
+            </div>
+            <div style="border: 1px dashed #cbd5e1; padding: 10px; border-radius: 6px; background: #fafafa;">
+              <div style="font-weight: 900; color: #0f172a;">مدير عام المستشفى</div>
+              <div style="font-size: 10px; color: #64748b; font-weight: bold;">General Director / CEO</div>
+              <div style="margin-top: 25px; border-bottom: 1px solid #94a3b8; width: 80%; margin: 20px auto 4px;"></div>
+              <div style="font-size: 9px; color: #94a3b8;">الاعتماد والختم الرسمي</div>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('printPreviewModal').classList.remove('hidden');
+    }
+
+    // Smart Print & Direct PDF Export Functions (Bypasses Iframe & Sandbox Print Blocks)
+    function executeSmartPrint() {
+      const content = document.getElementById('printPreviewContent').innerHTML;
+      const printWindow = window.open('', '_blank', 'width=1000,height=800');
+      if (printWindow) {
+        printWindow.document.open();
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html lang="ar" dir="rtl">
+          <head>
+            <meta charset="UTF-8">
+            <title>طباعة تقرير رسمي - مستشفى الناس للأطفال</title>
+            <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+            <style>
+              * { font-family: 'Cairo', sans-serif; box-sizing: border-box; }
+              body { background: #fff; color: #000; margin: 15mm; direction: rtl; }
+              table { width: 100%; border-collapse: collapse; page-break-inside: auto; }
+              tr { page-break-inside: avoid; page-break-after: auto; }
+              @media print {
+                body { margin: 8mm; }
+                .no-print-bar { display: none !important; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="no-print-bar" style="background:#f1f5f9;padding:10px;margin-bottom:15px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid #cbd5e1;">
+              <span style="font-size:12px;font-weight:bold;color:#0f766e;">🖨️ نافذة الطباعة المباشرة جاهزة - اختر الطابعة أو Save as PDF</span>
+              <button onclick="window.print()" style="background:#0f766e;color:#fff;border:none;padding:8px 18px;border-radius:6px;font-weight:bold;cursor:pointer;">🖨️ اضغط هنا للطباعة الآن</button>
+            </div>
+            ${content}
+            <script>
+              window.onload = function() {
+                setTimeout(function() { window.focus(); window.print(); }, 350);
+              };
+            <\/script>
+          </body>
+          </html>
+        `);
+        printWindow.document.close();
+      } else {
+        window.print();
+      }
+    }
+
+    function downloadDirectPdfReport() {
+      const element = document.getElementById('printPreviewContent');
+      const btn = document.getElementById('btnDownloadPdf');
+      if (!element) return;
+
+      if (typeof html2pdf !== 'undefined') {
+        if (btn) btn.textContent = "⏳ جاري تجهيز الـ PDF...";
+        const opt = {
+          margin:       [8, 8, 8, 8],
+          filename:     'تقرير_السلامة_مستشفى_الناس_' + new Date().toISOString().slice(0,10) + '.pdf',
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2, useCORS: true, logging: false },
+          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save().then(() => {
+          if (btn) btn.innerHTML = "<span>📥 تحميل ملف PDF مباشر</span>";
+          showToast("✅ تم تحميل ملف الـ PDF بنجاح في جهازك!");
+        }).catch(() => {
+          if (btn) btn.innerHTML = "<span>📥 تحميل ملف PDF مباشر</span>";
+          executeSmartPrint();
+        });
+      } else {
+        executeSmartPrint();
+      }
+    }
+
+    function downloadPrintableHtmlReport() {
+      const content = document.getElementById('printPreviewContent').innerHTML;
+      const fullHtml = `<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>تقرير السلامة والصحة المهنية - مستشفى الناس</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet"><style>*{font-family:'Cairo',sans-serif;box-sizing:border-box;}body{background:#fff;color:#000;margin:15mm;direction:rtl;}@media print{.no-print{display:none!important;}}</style></head><body><div class="no-print" style="margin-bottom:15px;padding:10px;background:#f8fafc;border:1px solid #cbd5e1;text-align:center;"><button onclick="window.print()" style="background:#0f766e;color:#fff;padding:10px 25px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:14px;">🖨️ طباعة التقرير الآن أو حفظه كـ PDF</button></div>${content}<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script></body></html>`;
+      const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'تقرير_رسمي_مستشفى_الناس_' + new Date().toISOString().slice(0,10) + '.html';
+      a.click();
+      showToast("📄 تم تنزيل نسخة التقرير الجاهزة للطباعة!");
+    }
+
+    // ================= 9. AUTHENTICATION & PASSWORD VAULT =================
+    function populateLoginUsers() {
+      const select = document.getElementById('loginUserSelect');
+      if (!select) return;
+      select.innerHTML = (activeTeam || []).map(u => `<option value="${u.id}">${u.name} - (${u.role}${u.isManager ? ' 👑' : ''})</option>`).join('');
+    }
+
+    function togglePasswordVisibility(id) {
+      const inp = document.getElementById(id);
+      if (inp) inp.type = inp.type === 'password' ? 'text' : 'password';
+    }
+
+    function handleLoginSubmit() {
+      const userId = parseInt(document.getElementById('loginUserSelect').value);
+      const pass = document.getElementById('loginPasswordInput').value.trim();
+      const user = activeTeam.find(u => u.id === userId);
+      if (!user) return;
+      if (pass !== getStoredPassword(user.id)) {
+        showToast("كلمة المرور غير صحيحة", true);
+        return;
+      }
+      currentUser = user;
+      localStorage.setItem(STORAGE_KEY_LOGGED_USER, String(user.id));
+      document.getElementById('loginOverlay').classList.add('hidden');
+      applyUserPermissions();
+      showToast(`أهلاً بك: ${user.name}`);
+    }
+
+    function handleUserLogout() {
+      currentUser = null;
+      localStorage.removeItem(STORAGE_KEY_LOGGED_USER);
+      document.getElementById('loginPasswordInput').value = '';
+      document.getElementById('loginOverlay').classList.remove('hidden');
+    }
+
+    function applyUserPermissions() {
+      if (!currentUser) return;
+      document.getElementById('loggedUserName').textContent = currentUser.name;
+      document.getElementById('userAvatarChar').textContent = currentUser.name.charAt(0);
+      const canEdit = isMasterAdmin();
+      document.getElementById('loggedUserRoleBadge').textContent = canEdit ? "Owner / صلاحية كاملة 👑" : currentUser.role;
+      document.querySelectorAll('.owner-only').forEach(el => {
+        el.style.display = canEdit ? '' : 'none';
+      });
+      renderAllViews();
+    }
+
+    function openPasswordChangeModal() { document.getElementById('passwordChangeModal').classList.remove('hidden'); }
+    function closePasswordChangeModal() { document.getElementById('passwordChangeModal').classList.add('hidden'); }
+
+    function handlePasswordChange() {
+      const p1 = document.getElementById('modalNewPasswordInput').value.trim();
+      const p2 = document.getElementById('modalConfirmPasswordInput').value.trim();
+      if (!p1 || p1 !== p2) { showToast("كلمات المرور غير متطابقة", true); return; }
+      setStoredPassword(currentUser.id, p1);
+      currentUser.password = p1;
+      persistAllData();
+      closePasswordChangeModal();
+      showToast("🔒 تم حفظ كلمة المرور الجديدة في السحابة وتعمل على كافة أجهزتك!");
+    }
+
+    function exportScheduleToCsv() {
+      let csv = "\uFEFFاليوم,التاريخ الموافق,الشفت,الموقع,المكلف\n";
+      (weeklySchedule || []).forEach((d, idx) => {
+        const dInfo = getActualDateForDayName(d.day, idx);
+        (d.morningUnits || []).forEach(u => { csv += `"${d.day}","${dInfo.numeric}","صباحي (08:00 AM - 08:00 PM)","${u.location}","${u.officer}"\n`; });
+        (d.nightUnits || []).forEach(u => { csv += `"${d.day}","${dInfo.numeric}","مسائي (08:00 PM - 08:00 AM)","${u.location}","${u.officer}"\n`; });
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "خطة_المرور_الأسبوعي_مستشفى_الناس.csv";
+      a.click();
+    }
+
+    function renderAllViews() {
+      renderWeeklySchedule();
+      renderUnifiedPlanView();
+      renderChecklistsGrid();
+      renderKpisTable();
+      renderActivitiesTable();
+      renderNcrTable();
+      renderIncidentsTable();
+      renderTeamCards();
+      populateLoginUsers();
+    }
+
+    window.onload = function() {
+      refreshFieldInspectors();
+      syncKpiKeysWithTeam();
+      updateCairoTimeAndCalendar();
+      setInterval(updateCairoTimeAndCalendar, 1000);
+      const savedUserId = localStorage.getItem(STORAGE_KEY_LOGGED_USER);
+      if (savedUserId) {
+        const found = activeTeam.find(u => String(u.id) === String(savedUserId));
+        currentUser = found || activeTeam[0];
+      } else {
+        currentUser = activeTeam[0];
+      }
+      document.getElementById('loginOverlay').classList.add('hidden');
+      applyUserPermissions();
+    };
+  </script>
+</body>
+</html>
