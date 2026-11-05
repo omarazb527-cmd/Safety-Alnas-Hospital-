@@ -104,7 +104,7 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-teal-500 selection:text-white">
 
   <!-- ================= LOGIN OVERLAY SCREEN ================= -->
-  <div id="loginOverlay" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex items-center justify-center p-4 hidden">
+  <div id="loginOverlay" class="fixed inset-0 z-50 bg-slate-950/98 backdrop-blur-xl flex items-center justify-center p-4">
     <div class="dark-panel rounded-3xl w-full max-w-md p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-800 text-center">
       <div class="w-fit mx-auto px-7 py-3.5 bg-white rounded-2xl shadow-xl flex items-center gap-4 border border-slate-200 min-w-[280px] justify-center" dir="ltr">
         <svg class="h-12 w-auto shrink-0" viewBox="0 0 150 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -206,7 +206,7 @@
               <div id="loggedUserRoleBadge" class="text-[10px] text-teal-400 font-semibold">Owner / صلاحية كاملة 👑</div>
             </div>
             <button onclick="openPasswordChangeModal()" title="تغيير كلمة المرور الخاصة" class="text-slate-400 hover:text-teal-300 p-1">⚙️</button>
-            <button onclick="handleUserLogout()" title="تبديل الحساب / تسجيل الخروج" class="text-rose-400 hover:text-rose-300 p-1 mr-1">🚪</button>
+            <button onclick="handleUserLogout()" title="تبديل الحساب / تسجيل الخروج الآمن" class="text-rose-400 hover:text-rose-300 p-1 mr-1 font-bold">🚪 خروج</button>
           </div>
         </div>
       </div>
@@ -249,7 +249,7 @@
       </div>
     </section>
 
-    <!-- Tab 1.5: UNIFIED WEEKLY PLAN (INSPECTIONS + DRILLS + TRAINING) -->
+    <!-- Tab 1.5: UNIFIED WEEKLY PLAN -->
     <section id="unifiedPlanTab" class="tab-content hidden space-y-4">
       <div class="dark-panel rounded-2xl p-5 shadow-2xl border border-slate-800 space-y-6">
         <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-700/80">
@@ -263,7 +263,6 @@
           </div>
         </div>
 
-        <!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="card-glass p-4 rounded-2xl border border-teal-500/30">
             <div class="flex items-center justify-between">
@@ -288,19 +287,16 @@
           </div>
         </div>
 
-        <!-- Section A: Consolidated Inspections -->
         <div class="space-y-2">
           <h3 class="text-xs font-black text-teal-400">أولاً: ملخص جولات الفحص الميداني الأسبوعية</h3>
           <div id="unifiedInspectionsSummary" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
         </div>
 
-        <!-- Section B: Consolidated Drills -->
         <div class="space-y-2 pt-3 border-t border-slate-800">
           <h3 class="text-xs font-black text-rose-400">ثانياً: خطة أكواد الطوارئ والدريلات (Drills)</h3>
           <div id="unifiedDrillsSummary" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
         </div>
 
-        <!-- Section C: Consolidated Trainings -->
         <div class="space-y-2 pt-3 border-t border-slate-800">
           <h3 class="text-xs font-black text-indigo-400">ثالثاً: خطة التدريبات الميدانية المطلوبة (Safety Trainings)</h3>
           <div class="overflow-x-auto">
@@ -323,7 +319,7 @@
       </div>
     </section>
 
-    <!-- Tab 2: Checklists (36 English Departments) -->
+    <!-- Tab 2: Checklists -->
     <section id="checklistsTab" class="tab-content hidden space-y-4">
       <div class="dark-panel rounded-2xl p-5 shadow-2xl border border-slate-800">
         <div class="flex flex-wrap items-center justify-between pb-3 border-b border-slate-800 gap-2">
@@ -471,7 +467,6 @@
           </table>
         </div>
 
-        <!-- Recent Field Inspections Log linked to KPIs -->
         <div class="mt-6 pt-4 border-t border-slate-800">
           <h3 class="text-xs font-black text-teal-400 mb-3">📋 سجل نتائج الفحوصات الميدانية المنفذة والمرتبطة بالـ KPIs</h3>
           <div class="overflow-x-auto">
@@ -503,10 +498,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
           <div class="card-glass p-4 rounded-2xl border border-slate-700 hover:border-teal-500 transition flex flex-col justify-between">
             <div>
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-lg">📅</span>
-                <span class="px-2 py-0.5 rounded bg-teal-500/20 text-teal-300 text-[10px] font-bold">تقرير مستقل</span>
-              </div>
+              <div class="flex items-center justify-between mb-2"><span class="text-lg">📅</span><span class="px-2 py-0.5 rounded bg-teal-500/20 text-teal-300 text-[10px] font-bold">تقرير مستقل</span></div>
               <h3 class="font-black text-white text-sm">تقرير جدول المرور الأسبوعي</h3>
               <p class="text-slate-400 text-[11px] mt-1">طباعة جدول توزيع الورديات الصباحية والمسائية ومواقع الفحص الـ 36</p>
             </div>
@@ -515,10 +507,7 @@
 
           <div class="card-glass p-4 rounded-2xl border border-slate-700 hover:border-cyan-500 transition flex flex-col justify-between">
             <div>
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-lg">🗂️</span>
-                <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-bold">تقرير مجمع للخطة</span>
-              </div>
+              <div class="flex items-center justify-between mb-2"><span class="text-lg">🗂️</span><span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-bold">تقرير مجمع للخطة</span></div>
               <h3 class="font-black text-white text-sm">تقرير الخطة المجمعة (فحص + دريلات + تدريب)</h3>
               <p class="text-slate-400 text-[11px] mt-1">يشمل قوائم الفحص الميداني المنفذة، الدريلات، والتدريبات المطلوبة معاً</p>
             </div>
@@ -527,10 +516,7 @@
 
           <div class="card-glass p-4 rounded-2xl border border-slate-700 hover:border-emerald-500 transition flex flex-col justify-between">
             <div>
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-lg">📊</span>
-                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">تقرير مستقل</span>
-              </div>
+              <div class="flex items-center justify-between mb-2"><span class="text-lg">📊</span><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">تقرير مستقل</span></div>
               <h3 class="font-black text-white text-sm">تقرير مصفوفة الـ KPIs ونتائج الفحص</h3>
               <p class="text-slate-400 text-[11px] mt-1">يوضح إنجاز كل مفتش ونتائج فحوصاته الميدانية ونسبة امتثاله الفعلية</p>
             </div>
@@ -539,10 +525,7 @@
 
           <div class="card-glass p-4 rounded-2xl border border-slate-700 hover:border-rose-500 transition flex flex-col justify-between">
             <div>
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-lg">⚠️</span>
-                <span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[10px] font-bold">تقرير مستقل</span>
-              </div>
+              <div class="flex items-center justify-between mb-2"><span class="text-lg">⚠️</span><span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[10px] font-bold">تقرير مستقل</span></div>
               <h3 class="font-black text-white text-sm">تقرير سجل عدم المطابقة (NCRs)</h3>
               <p class="text-slate-400 text-[11px] mt-1">كشف مستقل بجميع حالات عدم المطابقة والصور المرفقة وحالة الإغلاق</p>
             </div>
@@ -551,10 +534,7 @@
 
           <div class="card-glass p-4 rounded-2xl border border-slate-700 hover:border-amber-500 transition flex flex-col justify-between">
             <div>
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-lg">🩹</span>
-                <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold">تقرير مستقل</span>
-              </div>
+              <div class="flex items-center justify-between mb-2"><span class="text-lg">🩹</span><span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold">تقرير مستقل</span></div>
               <h3 class="font-black text-white text-sm">تقرير سجل الحوادث والإصابات</h3>
               <p class="text-slate-400 text-[11px] mt-1">كشف مستقل بتوثيق إصابات العمل أو شهادة خلو المستشفى من الحوادث</p>
             </div>
@@ -563,10 +543,7 @@
 
           <div class="card-glass p-4 rounded-2xl border border-slate-700 hover:border-indigo-500 transition flex flex-col justify-between">
             <div>
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-lg">🚨</span>
-                <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px] font-bold">تقرير مستقل</span>
-              </div>
+              <div class="flex items-center justify-between mb-2"><span class="text-lg">🚨</span><span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px] font-bold">تقرير مستقل</span></div>
               <h3 class="font-black text-white text-sm">تقرير أكواد الطوارئ والدريلات والتدريب</h3>
               <p class="text-slate-400 text-[11px] mt-1">كشف مستقل بخطة الدريلات والتدريبات الميدانية المنفذة والمجدولة</p>
             </div>
@@ -574,7 +551,6 @@
           </div>
         </div>
 
-        <!-- Master Comprehensive Report Banner -->
         <div class="p-5 rounded-2xl bg-gradient-to-r from-teal-950 via-slate-900 to-amber-950 border-2 border-amber-500/50 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
           <div>
             <span class="px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black text-[10px]">التقرير الرسمي المجمع ⭐</span>
@@ -812,7 +788,7 @@
       <div class="space-y-3 text-xs">
         <div>
           <label class="block text-slate-300 mb-1 font-bold">موضوع التدريب:</label>
-          <input type="text" id="trainingTopicInput" placeholder="مثال: الاستخدام الآمن لطفايات الحريق / التعامل مع الانسكابات..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none">
+          <input type="text" id="trainingTopicInput" placeholder="مثال: الاستخدام الآمن لطفايات الحريق..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none">
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
@@ -857,7 +833,7 @@
         </div>
         <div>
           <label class="block text-slate-300 mb-1 font-bold">المسمى الوظيفي (Role):</label>
-          <input type="text" id="modalMemberRole" placeholder="Supervisor Officer / Senior Officer / Officer" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white font-inter outline-none">
+          <input type="text" id="modalMemberRole" placeholder="Supervisor Officer / Senior Officer" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white font-inter outline-none">
         </div>
         <div>
           <label class="block text-slate-300 mb-1 font-bold">رقم الهاتف (واتساب):</label>
@@ -957,12 +933,12 @@
     const STORAGE_KEY_QUESTIONS = 'alnas_questions_master_v2';
     const STORAGE_KEY_TRAININGS = 'alnas_trainings_master_v2';
     const STORAGE_KEY_INSPECTION_LOGS = 'alnas_inspection_logs_v2';
-    const STORAGE_KEY_LOGGED_USER = 'alnas_logged_user_session_v2';
+    const STORAGE_KEY_LOGGED_USER = 'alnas_logged_user_session_secure_v4';
 
     let dbRef = null;
     try {
       if (typeof firebase !== 'undefined') {
-        const app = firebase.initializeApp({ databaseURL: FIREBASE_DB_URL });
+        firebase.initializeApp({ databaseURL: FIREBASE_DB_URL });
         const db = firebase.database();
         dbRef = db.ref("alnas_safety_master_data");
         db.ref(".info/connected").on("value", function(snap) {
@@ -979,7 +955,6 @@
       }
     } catch (e) {}
 
-    // All 36 Official English Departments
     const defaultDepartments = [
       "Main OR", "Cathlab", "CCU", "ICU 1 (Sec. 4)", "ICU 2 (Sec. 3)", "ICU 3",
       "NICU", "ER", "Radiology", "Lab", "Pharmacy", "Endoscopy", "CSSD",
@@ -1249,24 +1224,14 @@
       return (fieldInspectors || []).map(off => `<option value="${off.name}" ${off.name === selectedOfficer ? 'selected' : ''}>👤 ${off.name}</option>`).join('');
     }
 
-    // حساب التاريخ الفعلي الموافق لكل يوم من أيام الأسبوع الحالي تلقائياً (السبت -> الجمعة)
     function getActualDateForDayName(dayName, dayIdx = 0) {
       try {
         const now = new Date();
-        const jsDay = now.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
-        // تحويل الفهرس بحيث يبدأ الأسبوع من السبت = 0 وحتى الجمعة = 6
+        const jsDay = now.getDay();
         const currentSatBasedIdx = (jsDay + 1) % 7;
         const dayMap = {
-          "السبت": 0,
-          "الأحد": 1,
-          "الاحد": 1,
-          "الاثنين": 2,
-          "الإثنين": 2,
-          "الثلاثاء": 3,
-          "الأربعاء": 4,
-          "الاربعاء": 4,
-          "الخميس": 5,
-          "الجمعة": 6
+          "السبت": 0, "الأحد": 1, "الاحد": 1, "الاثنين": 2, "الإثنين": 2,
+          "الثلاثاء": 3, "الأربعاء": 4, "الاربعاء": 4, "الخميس": 5, "الجمعة": 6
         };
         let targetIdx = dayIdx % 7;
         const cleanName = (dayName || "").trim();
@@ -1278,19 +1243,11 @@
         }
         const diffDays = targetIdx - currentSatBasedIdx;
         const targetDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffDays);
-        const formattedAr = new Intl.DateTimeFormat('ar-EG', {
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric'
-        }).format(targetDate);
+        const formattedAr = new Intl.DateTimeFormat('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }).format(targetDate);
         const yyyy = targetDate.getFullYear();
         const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
         const dd = String(targetDate.getDate()).padStart(2, '0');
-        return {
-          formattedAr,
-          numeric: `${yyyy}/${mm}/${dd}`,
-          isToday: diffDays === 0
-        };
+        return { formattedAr, numeric: `${yyyy}/${mm}/${dd}`, isToday: diffDays === 0 };
       } catch (e) {
         return { formattedAr: "", numeric: "", isToday: false };
       }
@@ -1357,14 +1314,14 @@
               <div class="space-y-2">
                 <div class="flex items-center justify-between text-xs font-bold text-amber-300 px-1">
                   <span>☀️ الشفت الصباحي (08:00 AM - 08:00 PM)</span>
-                  ${canEdit ? `<button onclick="addNewScheduleUnit(${dayIndex}, 'morning')" class="px-2 py-0.5 bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-700/60 rounded text-[10px]">➕ إضافة موقع</button>` : ''}
+                  ${canEdit ? `<button onclick="addNewScheduleUnit(${dayIndex}, 'morning')" class="px-2 py-0.5 bg-amber-950/80 text-amber-300 border border-amber-700/60 rounded text-[10px]">➕ إضافة موقع</button>` : ''}
                 </div>
                 <div class="space-y-2">${morningHtml}</div>
               </div>
               <div class="space-y-2">
                 <div class="flex items-center justify-between text-xs font-bold text-indigo-300 px-1">
                   <span>🌙 الشفت المسائي (08:00 PM - 08:00 AM)</span>
-                  ${canEdit ? `<button onclick="addNewScheduleUnit(${dayIndex}, 'night')" class="px-2 py-0.5 bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 border border-indigo-700/60 rounded text-[10px]">➕ إضافة موقع</button>` : ''}
+                  ${canEdit ? `<button onclick="addNewScheduleUnit(${dayIndex}, 'night')" class="px-2 py-0.5 bg-indigo-950/80 text-indigo-300 border border-indigo-700/60 rounded text-[10px]">➕ إضافة موقع</button>` : ''}
                 </div>
                 <div class="space-y-2">${nightHtml}</div>
               </div>
@@ -1389,14 +1346,12 @@
       });
       persistAllData();
       renderAllViews();
-      showToast("تمت إضافة يوم جديد للجدول 📅");
     }
 
     function deleteScheduleDay(dayIdx) {
       weeklySchedule.splice(dayIdx, 1);
       persistAllData();
       renderAllViews();
-      showToast("تم حذف اليوم من الجدول 🗑️");
     }
 
     function updateScheduleLocation(dayIdx, shift, uIdx, val) {
@@ -1428,7 +1383,7 @@
       renderAllViews();
     }
 
-    // ================= 2. CHECKLISTS & 36 DEPARTMENTS =================
+    // ================= 2. CHECKLISTS =================
     let currentChecklistDepartment = "";
     let currentChecklistOfficer = "";
 
@@ -1474,11 +1429,7 @@
     }
 
     function addNewQuestionToChecklist() {
-      standardChecklistQuestions.push({
-        id: Date.now(),
-        category: "Safety Standard",
-        text: "New inspection item - click to edit criteria"
-      });
+      standardChecklistQuestions.push({ id: Date.now(), category: "Safety Standard", text: "New inspection item" });
       persistAllData();
       renderChecklistQuestionsInsideModal();
     }
@@ -1507,9 +1458,7 @@
       return score;
     }
 
-    function closeChecklistModal() {
-      document.getElementById('checklistModal').classList.add('hidden');
-    }
+    function closeChecklistModal() { document.getElementById('checklistModal').classList.add('hidden'); }
 
     function saveInspectionChecklist() {
       let createdNcrs = 0;
@@ -1612,30 +1561,21 @@
       const canEdit = isMasterAdmin();
       tbody.innerHTML = (activitiesList || []).map((a, idx) => `
         <tr class="border-b border-slate-800 hover:bg-slate-800/40">
-          <td class="p-2">
-            ${canEdit ? `<input type="text" value="${a.title}" onchange="updateDrillField(${idx}, 'title', this.value)" class="editable-input w-full font-bold text-teal-300 text-xs">` : `<span class="font-bold text-teal-300">${a.title}</span>`}
-          </td>
-          <td class="p-2">
-            ${canEdit ? `<select onchange="updateDrillField(${idx}, 'dept', this.value)" class="editable-input w-full font-inter text-xs">${buildLocationOptions(a.dept)}</select>` : `<span class="font-inter font-bold text-white">📍 ${a.dept}</span>`}
-          </td>
-          <td class="p-2">
-            ${canEdit ? `<select onchange="updateDrillField(${idx}, 'trainer', this.value)" class="editable-input w-full text-xs">${buildOfficerOptions(a.trainer)}</select>` : `<span class="text-slate-200">👤 ${a.trainer}</span>`}
-          </td>
-          <td class="p-2">
-            ${canEdit ? `<input type="date" value="${a.date}" onchange="updateDrillField(${idx}, 'date', this.value)" class="editable-input font-mono text-xs">` : `<span class="font-mono text-slate-400">${a.date}</span>`}
-          </td>
+          <td class="p-2">${canEdit ? `<input type="text" value="${a.title}" onchange="updateDrillField(${idx}, 'title', this.value)" class="editable-input w-full font-bold text-teal-300 text-xs">` : `<span class="font-bold text-teal-300">${a.title}</span>`}</td>
+          <td class="p-2">${canEdit ? `<select onchange="updateDrillField(${idx}, 'dept', this.value)" class="editable-input w-full font-inter text-xs">${buildLocationOptions(a.dept)}</select>` : `<span class="font-inter font-bold text-white">📍 ${a.dept}</span>`}</td>
+          <td class="p-2">${canEdit ? `<select onchange="updateDrillField(${idx}, 'trainer', this.value)" class="editable-input w-full text-xs">${buildOfficerOptions(a.trainer)}</select>` : `<span class="text-slate-200">👤 ${a.trainer}</span>`}</td>
+          <td class="p-2">${canEdit ? `<input type="date" value="${a.date}" onchange="updateDrillField(${idx}, 'date', this.value)" class="editable-input font-mono text-xs">` : `<span class="font-mono text-slate-400">${a.date}</span>`}</td>
           <td class="p-2">
             ${canEdit ? `
             <select onchange="updateDrillField(${idx}, 'status', this.value)" class="editable-input text-xs font-bold ${a.status.includes('تم') ? 'text-emerald-300' : 'text-amber-300'}">
               <option value="مجدول ⏳" ${a.status.includes('مجدول') ? 'selected' : ''}>مجدول ⏳</option>
               <option value="تم التنفيذ بنجاح ✓" ${a.status.includes('تم') ? 'selected' : ''}>تم التنفيذ بنجاح ✓</option>
-              <option value="مؤجل ⏸️" ${a.status.includes('مؤجل') ? 'selected' : ''}>مؤجل ⏸️</option>
             </select>` : `<span class="font-bold ${a.status.includes('تم') ? 'text-emerald-300' : 'text-amber-300'}">${a.status}</span>`}
           </td>
           <td class="p-2 text-center">
             <div class="flex items-center justify-center gap-1">
               <button onclick="completeDrillItem(${idx})" class="px-2 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded text-[10px] font-bold">✓ تم التنفيذ</button>
-              ${canEdit ? `<button onclick="deleteDrillItem(${idx})" class="p-1 bg-rose-950 hover:bg-rose-800 text-rose-300 rounded text-xs">🗑️</button>` : ''}
+              ${canEdit ? `<button onclick="deleteDrillItem(${idx})" class="p-1 bg-rose-950 text-rose-300 rounded text-xs">🗑️</button>` : ''}
             </div>
           </td>
         </tr>
@@ -1696,43 +1636,24 @@
       if (!tbody) return;
       const canEdit = isMasterAdmin();
       if (!ncrList || ncrList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">لا توجد تقارير عدم مطابقة مفتوحة حالياً - اضغط على (➕ رصد ملاحظة NCR جديدة) للإضافة.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">لا توجد تقارير عدم مطابقة مفتوحة حالياً.</td></tr>`;
         return;
       }
       tbody.innerHTML = ncrList.map((ncr, idx) => `
         <tr class="border-b border-slate-800 hover:bg-slate-800/40">
-          <td class="p-2">
-            ${canEdit ? `<input type="text" value="${ncr.id}" onchange="updateNcrInlineField(${idx}, 'id', this.value)" class="editable-input font-mono font-bold text-rose-400 w-24 text-xs">` : `<span class="font-mono font-bold text-rose-400">${ncr.id}</span>`}
-          </td>
-          <td class="p-2">
-            ${canEdit ? `<select onchange="updateNcrInlineField(${idx}, 'dept', this.value)" class="editable-input font-inter text-xs w-36">${buildLocationOptions(ncr.dept)}</select>` : `<span class="font-inter font-bold">${ncr.dept}</span>`}
-          </td>
-          <td class="p-2">
-            ${canEdit ? `<input type="text" value="${ncr.desc}" onchange="updateNcrInlineField(${idx}, 'desc', this.value)" class="editable-input text-slate-100 w-full min-w-[180px] text-xs">` : `<span>${ncr.desc}</span>`}
-          </td>
-          <td class="p-2 text-center">${ncr.photo ? `<img src="${ncr.photo}" class="w-10 h-10 object-cover rounded border border-slate-600 mx-auto">` : '<span class="text-[10px] text-slate-500">بدون صورة</span>'}</td>
-          <td class="p-2">
-            ${canEdit ? `
-            <select onchange="updateNcrInlineField(${idx}, 'risk', this.value)" class="editable-input text-xs text-amber-300 font-bold">
-              <option value="High 🔴" ${ncr.risk.includes('High') ? 'selected' : ''}>High 🔴</option>
-              <option value="Medium 🟡" ${ncr.risk.includes('Medium') ? 'selected' : ''}>Medium 🟡</option>
-              <option value="Low 🟢" ${ncr.risk.includes('Low') ? 'selected' : ''}>Low 🟢</option>
-            </select>` : `<span class="text-amber-300 font-bold">${ncr.risk}</span>`}
-          </td>
-          <td class="p-2">
-            ${canEdit ? `<select onchange="updateNcrInlineField(${idx}, 'responsible', this.value)" class="editable-input text-xs text-teal-300">${buildOfficerOptions(ncr.responsible)}</select>` : `<span class="text-teal-300">${ncr.responsible}</span>`}
-          </td>
-          <td class="p-2">
-            ${canEdit ? `<input type="date" value="${ncr.dueDate}" onchange="updateNcrInlineField(${idx}, 'dueDate', this.value)" class="editable-input font-mono text-xs">` : `<span class="font-mono">${ncr.dueDate}</span>`}
-          </td>
-          <td class="p-2">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${ncr.status === 'Closed' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">${ncr.status}</span>
-          </td>
+          <td class="p-2">${canEdit ? `<input type="text" value="${ncr.id}" onchange="updateNcrInlineField(${idx}, 'id', this.value)" class="editable-input font-mono font-bold text-rose-400 w-24 text-xs">` : `<span class="font-mono font-bold text-rose-400">${ncr.id}</span>`}</td>
+          <td class="p-2">${canEdit ? `<select onchange="updateNcrInlineField(${idx}, 'dept', this.value)" class="editable-input font-inter text-xs w-36">${buildLocationOptions(ncr.dept)}</select>` : `<span class="font-inter font-bold">${ncr.dept}</span>`}</td>
+          <td class="p-2">${canEdit ? `<input type="text" value="${ncr.desc}" onchange="updateNcrInlineField(${idx}, 'desc', this.value)" class="editable-input text-slate-100 w-full text-xs">` : `<span>${ncr.desc}</span>`}</td>
+          <td class="p-2 text-center">${ncr.photo ? `<img src="${ncr.photo}" class="w-10 h-10 object-cover rounded mx-auto">` : '-'}</td>
+          <td class="p-2">${canEdit ? `<select onchange="updateNcrInlineField(${idx}, 'risk', this.value)" class="editable-input text-xs text-amber-300 font-bold"><option value="High 🔴" ${ncr.risk.includes('High')?'selected':''}>High 🔴</option><option value="Medium 🟡" ${ncr.risk.includes('Medium')?'selected':''}>Medium 🟡</option><option value="Low 🟢" ${ncr.risk.includes('Low')?'selected':''}>Low 🟢</option></select>` : `<span class="text-amber-300 font-bold">${ncr.risk}</span>`}</td>
+          <td class="p-2">${canEdit ? `<select onchange="updateNcrInlineField(${idx}, 'responsible', this.value)" class="editable-input text-xs text-teal-300">${buildOfficerOptions(ncr.responsible)}</select>` : `<span class="text-teal-300">${ncr.responsible}</span>`}</td>
+          <td class="p-2">${canEdit ? `<input type="date" value="${ncr.dueDate}" onchange="updateNcrInlineField(${idx}, 'dueDate', this.value)" class="editable-input font-mono text-xs">` : `<span class="font-mono">${ncr.dueDate}</span>`}</td>
+          <td class="p-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${ncr.status === 'Closed' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">${ncr.status}</span></td>
           <td class="p-2 text-center">
             <div class="flex items-center justify-center gap-1">
-              <button onclick="toggleNcrStatus(${idx})" class="px-2 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded text-[10px] font-bold">${ncr.status === 'Closed' ? 'فتح' : '✓ إغلاق'}</button>
-              <button onclick="openNcrModal(${idx})" title="إرفاق / تعديل الصورة" class="p-1 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded text-xs">📷</button>
-              ${canEdit ? `<button onclick="deleteNcrItem(${idx})" class="p-1 bg-rose-950 hover:bg-rose-800 text-rose-300 rounded text-xs">🗑️</button>` : ''}
+              <button onclick="toggleNcrStatus(${idx})" class="px-2 py-1 bg-emerald-700 text-white rounded text-[10px] font-bold">${ncr.status === 'Closed' ? 'فتح' : '✓ إغلاق'}</button>
+              <button onclick="openNcrModal(${idx})" class="p-1 bg-slate-700 text-slate-200 rounded text-xs">📷</button>
+              ${canEdit ? `<button onclick="deleteNcrItem(${idx})" class="p-1 bg-rose-950 text-rose-300 rounded text-xs">🗑️</button>` : ''}
             </div>
           </td>
         </tr>
@@ -1833,43 +1754,28 @@
       renderAllViews();
     }
 
-    // ================= 5. WORK INCIDENTS LOG =================
+    // ================= 5. INCIDENTS LOG =================
     function renderIncidentsTable() {
       const tbody = document.getElementById('incidentsTableBody');
       if (!tbody) return;
       const canEdit = isMasterAdmin();
       if (!incidentsList || incidentsList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-emerald-400 font-bold">🛡️ بيئة عمل آمنة - سجل خالي من الحوادث (Zero Accidents) - اضغط على (➕ تسجيل حادث) عند الحاجة.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-emerald-400 font-bold">🛡️ بيئة عمل آمنة - سجل خالي من الحوادث (Zero Accidents).</td></tr>`;
         return;
       }
       tbody.innerHTML = incidentsList.map((inc, idx) => `
         <tr class="border-b border-slate-800 hover:bg-slate-800/40">
-          <td class="p-2">
-            ${canEdit ? `<input type="text" value="${inc.id}" onchange="updateIncidentInlineField(${idx}, 'id', this.value)" class="editable-input font-mono font-bold text-amber-400 w-24 text-xs">` : `<span class="font-mono font-bold text-amber-400">${inc.id}</span>`}
-          </td>
-          <td class="p-2">
-            ${canEdit ? `<input type="text" value="${inc.dateTime}" onchange="updateIncidentInlineField(${idx}, 'dateTime', this.value)" class="editable-input font-mono text-[11px] w-36">` : `<span class="font-mono">${inc.dateTime}</span>`}
-          </td>
-          <td class="p-2 space-y-1">
-            ${canEdit ? `
-              <input type="text" value="${inc.person}" onchange="updateIncidentInlineField(${idx}, 'person', this.value)" class="editable-input font-bold text-white w-full text-xs">
-              <input type="text" value="${inc.job}" onchange="updateIncidentInlineField(${idx}, 'job', this.value)" class="editable-input text-[10px] text-teal-300 w-full">`
-            : `<div class="font-bold text-white">${inc.person}</div><div class="text-[10px] text-teal-300">${inc.job}</div>`}
-          </td>
-          <td class="p-2">
-            ${canEdit ? `<input type="text" value="${inc.type}" onchange="updateIncidentInlineField(${idx}, 'type', this.value)" class="editable-input text-amber-300 font-bold text-xs w-40">` : `<span class="text-amber-300 font-bold">${inc.type}</span>`}
-          </td>
-          <td class="p-2">
-            ${canEdit ? `<select onchange="updateIncidentInlineField(${idx}, 'location', this.value)" class="editable-input font-inter text-xs w-36">${buildLocationOptions(inc.location)}</select>` : `<span class="font-inter">📍 ${inc.location}</span>`}
-          </td>
-          <td class="p-2 text-center">${inc.photo ? `<img src="${inc.photo}" class="w-10 h-10 object-cover rounded border border-slate-600 mx-auto">` : '<span class="text-[10px] text-slate-500">بدون صورة</span>'}</td>
-          <td class="p-2 text-center">
-            ${canEdit ? `<input type="number" min="0" value="${inc.lostDays}" onchange="updateIncidentInlineField(${idx}, 'lostDays', this.value)" class="editable-input text-center font-bold text-emerald-400 w-16 text-xs">` : `<span class="font-bold text-emerald-400">${inc.lostDays}</span>`}
-          </td>
+          <td class="p-2">${canEdit ? `<input type="text" value="${inc.id}" onchange="updateIncidentInlineField(${idx}, 'id', this.value)" class="editable-input font-mono font-bold text-amber-400 w-24 text-xs">` : `<span class="font-mono font-bold text-amber-400">${inc.id}</span>`}</td>
+          <td class="p-2">${canEdit ? `<input type="text" value="${inc.dateTime}" onchange="updateIncidentInlineField(${idx}, 'dateTime', this.value)" class="editable-input font-mono text-[11px] w-36">` : `<span class="font-mono">${inc.dateTime}</span>`}</td>
+          <td class="p-2 space-y-1">${canEdit ? `<input type="text" value="${inc.person}" onchange="updateIncidentInlineField(${idx}, 'person', this.value)" class="editable-input font-bold text-white w-full text-xs"><input type="text" value="${inc.job}" onchange="updateIncidentInlineField(${idx}, 'job', this.value)" class="editable-input text-[10px] text-teal-300 w-full">` : `<div class="font-bold text-white">${inc.person}</div><div class="text-[10px] text-teal-300">${inc.job}</div>`}</td>
+          <td class="p-2">${canEdit ? `<input type="text" value="${inc.type}" onchange="updateIncidentInlineField(${idx}, 'type', this.value)" class="editable-input text-amber-300 font-bold text-xs w-40">` : `<span class="text-amber-300 font-bold">${inc.type}</span>`}</td>
+          <td class="p-2">${canEdit ? `<select onchange="updateIncidentInlineField(${idx}, 'location', this.value)" class="editable-input font-inter text-xs w-36">${buildLocationOptions(inc.location)}</select>` : `<span class="font-inter">📍 ${inc.location}</span>`}</td>
+          <td class="p-2 text-center">${inc.photo ? `<img src="${inc.photo}" class="w-10 h-10 object-cover rounded mx-auto">` : '-'}</td>
+          <td class="p-2 text-center">${canEdit ? `<input type="number" min="0" value="${inc.lostDays}" onchange="updateIncidentInlineField(${idx}, 'lostDays', this.value)" class="editable-input text-center font-bold text-emerald-400 w-16 text-xs">` : `<span class="font-bold text-emerald-400">${inc.lostDays}</span>`}</td>
           <td class="p-2 text-center">
             <div class="flex items-center justify-center gap-1">
-              <button onclick="openIncidentModal(${idx})" title="إرفاق / تعديل الصورة" class="p-1 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded text-xs">📷</button>
-              ${canEdit ? `<button onclick="deleteIncidentItem(${idx})" class="p-1 bg-rose-950 hover:bg-rose-800 text-rose-300 rounded text-xs">🗑️</button>` : ''}
+              <button onclick="openIncidentModal(${idx})" class="p-1 bg-slate-700 text-slate-200 rounded text-xs">📷</button>
+              ${canEdit ? `<button onclick="deleteIncidentItem(${idx})" class="p-1 bg-rose-950 text-rose-300 rounded text-xs">🗑️</button>` : ''}
             </div>
           </td>
         </tr>
@@ -1943,7 +1849,7 @@
       renderAllViews();
     }
 
-    // ================= 6. KPIs MATRIX & INSPECTION LOGS =================
+    // ================= 6. KPIs MATRIX =================
     function calculateOfficerCompliance(kpi) {
       const ins = Number(kpi.inspections || 0);
       const ncrs = Number(kpi.ncrsClosed || 0);
@@ -1965,28 +1871,18 @@
         return `
           <tr class="border-b border-slate-800 hover:bg-slate-800/40">
             <td class="p-3 text-center text-slate-400 font-bold">${index + 1}</td>
-            <td class="p-2">
-              ${canEdit ? `<input type="text" value="${officer.name}" onchange="updateMemberInline(${officer.id}, 'name', this.value)" class="editable-input font-bold text-white text-xs w-44">` : `<span class="font-bold text-white">${officer.name}</span>`}
-            </td>
-            <td class="p-2">
-              ${canEdit ? `<input type="text" value="${officer.role}" onchange="updateMemberInline(${officer.id}, 'role', this.value)" class="editable-input font-semibold text-teal-400 font-inter text-xs w-36">` : `<span class="text-teal-400 font-inter">${officer.role}</span>`}
-            </td>
-            <td class="p-2 text-center">
-              ${canEdit ? `<input type="number" min="0" value="${kpi.inspections}" onchange="updateOfficerKpi(${officer.id}, 'inspections', this.value)" class="w-16 bg-slate-900 border border-teal-700 rounded-lg p-1.5 text-center text-xs text-teal-300 font-bold outline-none">` : `<span class="font-bold text-teal-300">${kpi.inspections}</span>`}
-            </td>
-            <td class="p-2 text-center">
-              ${canEdit ? `<input type="number" min="0" value="${kpi.ncrsClosed}" onchange="updateOfficerKpi(${officer.id}, 'ncrsClosed', this.value)" class="w-16 bg-slate-900 border border-blue-700 rounded-lg p-1.5 text-center text-xs text-blue-300 font-bold outline-none">` : `<span class="font-bold text-blue-300">${kpi.ncrsClosed}</span>`}
-            </td>
-            <td class="p-2 text-center">
-              ${canEdit ? `<input type="number" min="0" value="${kpi.drills}" onchange="updateOfficerKpi(${officer.id}, 'drills', this.value)" class="w-16 bg-slate-900 border border-amber-700 rounded-lg p-1.5 text-center text-xs text-amber-300 font-bold outline-none">` : `<span class="font-bold text-amber-300">${kpi.drills}</span>`}
-            </td>
+            <td class="p-2">${canEdit ? `<input type="text" value="${officer.name}" onchange="updateMemberInline(${officer.id}, 'name', this.value)" class="editable-input font-bold text-white text-xs w-44">` : `<span class="font-bold text-white">${officer.name}</span>`}</td>
+            <td class="p-2">${canEdit ? `<input type="text" value="${officer.role}" onchange="updateMemberInline(${officer.id}, 'role', this.value)" class="editable-input font-semibold text-teal-400 font-inter text-xs w-36">` : `<span class="text-teal-400 font-inter">${officer.role}</span>`}</td>
+            <td class="p-2 text-center">${canEdit ? `<input type="number" min="0" value="${kpi.inspections}" onchange="updateOfficerKpi(${officer.id}, 'inspections', this.value)" class="w-16 bg-slate-900 border border-teal-700 rounded-lg p-1.5 text-center text-xs text-teal-300 font-bold outline-none">` : `<span class="font-bold text-teal-300">${kpi.inspections}</span>`}</td>
+            <td class="p-2 text-center">${canEdit ? `<input type="number" min="0" value="${kpi.ncrsClosed}" onchange="updateOfficerKpi(${officer.id}, 'ncrsClosed', this.value)" class="w-16 bg-slate-900 border border-blue-700 rounded-lg p-1.5 text-center text-xs text-blue-300 font-bold outline-none">` : `<span class="font-bold text-blue-300">${kpi.ncrsClosed}</span>`}</td>
+            <td class="p-2 text-center">${canEdit ? `<input type="number" min="0" value="${kpi.drills}" onchange="updateOfficerKpi(${officer.id}, 'drills', this.value)" class="w-16 bg-slate-900 border border-amber-700 rounded-lg p-1.5 text-center text-xs text-amber-300 font-bold outline-none">` : `<span class="font-bold text-amber-300">${kpi.drills}</span>`}</td>
             <td class="p-3 text-center font-black text-white">${score}%</td>
             <td class="p-3 text-center"><span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${score >= 85 ? 'bg-emerald-500/20 text-emerald-300' : (score >= 50 ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-700 text-slate-300')}">${score >= 85 ? 'ممتاز ★★★' : (score >= 50 ? 'جيد جداً ★★' : 'قيد التقييم')}</span></td>
             ${canEdit ? `
             <td class="p-3 text-center">
               <div class="flex items-center justify-center gap-1">
-                <button onclick="deleteOfficerKpiData(${officer.id})" class="px-2 py-1 bg-amber-950 hover:bg-amber-900 text-amber-300 rounded text-[10px]">تصفير</button>
-                <button onclick="handleDeleteMember(${officer.id})" class="px-2 py-1 bg-rose-950 hover:bg-rose-900 text-rose-300 rounded text-[10px]">🗑️</button>
+                <button onclick="deleteOfficerKpiData(${officer.id})" class="px-2 py-1 bg-amber-950 text-amber-300 rounded text-[10px]">تصفير</button>
+                <button onclick="handleDeleteMember(${officer.id})" class="px-2 py-1 bg-rose-950 text-rose-300 rounded text-[10px]">🗑️</button>
               </div>
             </td>` : ''}
           </tr>
@@ -1996,7 +1892,7 @@
       const logsBody = document.getElementById('inspectionLogsTableBody');
       if (logsBody) {
         if (!inspectionLogsList || inspectionLogsList.length === 0) {
-          logsBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">لم يتم تسجيل جولات فحص ميدانية بعد - عند إجراء أي فحص سيظهر هنا ويرتبط بالـ KPIs مباشرة.</td></tr>`;
+          logsBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">لم يتم تسجيل جولات فحص ميدانية بعد.</td></tr>`;
         } else {
           logsBody.innerHTML = inspectionLogsList.slice(0, 20).map(log => `
             <tr class="border-b border-slate-800">
@@ -2031,7 +1927,7 @@
       showToast("تم تصفير كافة المؤشرات بنجاح 🔄");
     }
 
-    // ================= 6.5 UNIFIED PLAN (INSPECTIONS + DRILLS + TRAINING) =================
+    // ================= 6.5 UNIFIED PLAN =================
     function renderUnifiedPlanView() {
       let totalInspections = 0;
       (weeklySchedule || []).forEach(d => {
@@ -2090,7 +1986,7 @@
               <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${tr.status.includes('تم') ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">${tr.status}</span></td>
               <td class="p-2.5 text-center">
                 <div class="flex items-center justify-center gap-1">
-                  <button onclick="completeTrainingItem(${idx})" class="px-2 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded text-[10px] font-bold">✓ تم التنفيذ</button>
+                  <button onclick="completeTrainingItem(${idx})" class="px-2 py-1 bg-emerald-700 text-white rounded text-[10px] font-bold">✓ تم التنفيذ</button>
                   ${canEdit ? `<button onclick="deleteTrainingItem(${idx})" class="p-1 bg-rose-950 text-rose-300 rounded text-xs">🗑️</button>` : ''}
                 </div>
               </td>
@@ -2162,15 +2058,15 @@
               </div>
               ${canEdit ? `
               <div class="flex items-center gap-1">
-                <button onclick="openMemberModal(${member.id})" class="px-2 py-1 bg-slate-800 hover:bg-teal-700 text-teal-300 hover:text-white rounded text-[10px] font-bold border border-slate-700">✏️ تعديل</button>
-                ${!member.isManager ? `<button onclick="handleDeleteMember(${member.id})" class="p-1 bg-rose-950/70 hover:bg-rose-800 text-rose-300 rounded text-[10px] border border-rose-800">🗑️</button>` : ''}
+                <button onclick="openMemberModal(${member.id})" class="px-2 py-1 bg-slate-800 text-teal-300 rounded text-[10px] font-bold">✏️ تعديل</button>
+                ${!member.isManager ? `<button onclick="handleDeleteMember(${member.id})" class="p-1 bg-rose-950 text-rose-300 rounded text-[10px]">🗑️</button>` : ''}
               </div>` : ''}
             </div>
             <div class="mt-3 text-[11px] text-slate-400 font-mono" dir="ltr">📱 ${member.phone || ''}</div>
           </div>
           <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
             <span class="text-[10px] text-teal-300">مرتبط بـ KPIs والسحابة ✓</span>
-            ${member.isManager ? '<span class="px-2 py-0.5 rounded text-[9px] font-black bg-amber-500/20 text-amber-300">Owner / المدير 👑</span>' : ''}
+            ${member.isManager ? '<span class="px-2 py-0.5 rounded text-[9px] font-black bg-amber-500/20 text-amber-300">Owner 👑</span>' : ''}
             ${member.isLeader ? '<span class="px-2 py-0.5 rounded text-[9px] font-black bg-indigo-500/20 text-indigo-300">Team Leader 🛡️</span>' : ''}
           </div>
         </div>
@@ -2266,18 +2162,7 @@
         </tr>
       `;
       }).join('');
-      return `
-        <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;">
-          <thead>
-            <tr style="background: #0f766e; color: #ffffff;">
-              <th style="padding: 8px; border: 1px solid #0f766e; width: 18%; text-align: center;">اليوم والتاريخ الفعلي</th>
-              <th style="padding: 8px; border: 1px solid #0f766e; width: 41%;">☀️ الشفت الصباحي (08:00 AM - 08:00 PM)</th>
-              <th style="padding: 8px; border: 1px solid #0f766e; width: 41%;">🌙 الشفت المسائي (08:00 PM - 08:00 AM)</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      `;
+      return `<table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;"><thead><tr style="background: #0f766e; color: #ffffff;"><th style="padding: 8px; border: 1px solid #0f766e; width: 18%; text-align: center;">اليوم والتاريخ الفعلي</th><th style="padding: 8px; border: 1px solid #0f766e; width: 41%;">☀️ الشفت الصباحي</th><th style="padding: 8px; border: 1px solid #0f766e; width: 41%;">🌙 الشفت المسائي</th></tr></thead><tbody>${rows}</tbody></table>`;
     }
 
     function buildTableNcrHtml() {
@@ -2293,23 +2178,7 @@
           <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold;">${ncr.status}</td>
         </tr>
       `).join('') || `<tr><td colspan="8" style="padding: 12px; text-align: center; border: 1px solid #cbd5e1;">لا توجد حالات عدم مطابقة مسجلة</td></tr>`;
-      return `
-        <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;">
-          <thead>
-            <tr style="background: #be123c; color: #ffffff;">
-              <th style="padding: 8px; border: 1px solid #be123c;">رقم NCR</th>
-              <th style="padding: 8px; border: 1px solid #be123c;">القسم</th>
-              <th style="padding: 8px; border: 1px solid #be123c;">وصف عدم المطابقة</th>
-              <th style="padding: 8px; border: 1px solid #be123c;">الصورة</th>
-              <th style="padding: 8px; border: 1px solid #be123c;">الخطورة</th>
-              <th style="padding: 8px; border: 1px solid #be123c;">المسؤول</th>
-              <th style="padding: 8px; border: 1px solid #be123c;">المهلة</th>
-              <th style="padding: 8px; border: 1px solid #be123c;">الحالة</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      `;
+      return `<table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;"><thead><tr style="background: #be123c; color: #ffffff;"><th style="padding: 8px; border: 1px solid #be123c;">رقم NCR</th><th style="padding: 8px; border: 1px solid #be123c;">القسم</th><th style="padding: 8px; border: 1px solid #be123c;">وصف عدم المطابقة</th><th style="padding: 8px; border: 1px solid #be123c;">الصورة</th><th style="padding: 8px; border: 1px solid #be123c;">الخطورة</th><th style="padding: 8px; border: 1px solid #be123c;">المسؤول</th><th style="padding: 8px; border: 1px solid #be123c;">المهلة</th><th style="padding: 8px; border: 1px solid #be123c;">الحالة</th></tr></thead><tbody>${rows}</tbody></table>`;
     }
 
     function buildTableIncidentsHtml() {
@@ -2324,22 +2193,7 @@
           <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold;">${inc.lostDays} يوم</td>
         </tr>
       `).join('') || `<tr><td colspan="7" style="padding: 12px; text-align: center; border: 1px solid #cbd5e1; color: #15803d; font-weight: bold;">🛡️ سجل خالي من الحوادث والإصابات (Zero Accidents)</td></tr>`;
-      return `
-        <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;">
-          <thead>
-            <tr style="background: #b45309; color: #ffffff;">
-              <th style="padding: 8px; border: 1px solid #b45309;">رقم الحادث</th>
-              <th style="padding: 8px; border: 1px solid #b45309;">التاريخ والوقت</th>
-              <th style="padding: 8px; border: 1px solid #b45309;">المصاب / الوظيفة</th>
-              <th style="padding: 8px; border: 1px solid #b45309;">نوع الإصابة</th>
-              <th style="padding: 8px; border: 1px solid #b45309;">الموقع</th>
-              <th style="padding: 8px; border: 1px solid #b45309;">الصورة</th>
-              <th style="padding: 8px; border: 1px solid #b45309;">أيام الغياب</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      `;
+      return `<table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;"><thead><tr style="background: #b45309; color: #ffffff;"><th style="padding: 8px; border: 1px solid #b45309;">رقم الحادث</th><th style="padding: 8px; border: 1px solid #b45309;">التاريخ والوقت</th><th style="padding: 8px; border: 1px solid #b45309;">المصاب / الوظيفة</th><th style="padding: 8px; border: 1px solid #b45309;">نوع الإصابة</th><th style="padding: 8px; border: 1px solid #b45309;">الموقع</th><th style="padding: 8px; border: 1px solid #b45309;">الصورة</th><th style="padding: 8px; border: 1px solid #b45309;">أيام الغياب</th></tr></thead><tbody>${rows}</tbody></table>`;
     }
 
     function buildTableKpisHtml() {
@@ -2358,22 +2212,7 @@
           </tr>
         `;
       }).join('');
-      return `
-        <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;">
-          <thead>
-            <tr style="background: #0f766e; color: #ffffff;">
-              <th style="padding: 8px; border: 1px solid #0f766e; text-align: center;">م</th>
-              <th style="padding: 8px; border: 1px solid #0f766e;">اسم المفتش</th>
-              <th style="padding: 8px; border: 1px solid #0f766e;">المسمى الوظيفي</th>
-              <th style="padding: 8px; border: 1px solid #0f766e; text-align: center;">جولات منجزة</th>
-              <th style="padding: 8px; border: 1px solid #0f766e; text-align: center;">NCRs مغلقة</th>
-              <th style="padding: 8px; border: 1px solid #0f766e; text-align: center;">دريلات وتدريب</th>
-              <th style="padding: 8px; border: 1px solid #0f766e; text-align: center;">نسبة الامتثال</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      `;
+      return `<table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;"><thead><tr style="background: #0f766e; color: #ffffff;"><th style="padding: 8px; border: 1px solid #0f766e; text-align: center;">م</th><th style="padding: 8px; border: 1px solid #0f766e;">اسم المفتش</th><th style="padding: 8px; border: 1px solid #0f766e;">المسمى الوظيفي</th><th style="padding: 8px; border: 1px solid #0f766e; text-align: center;">جولات منجزة</th><th style="padding: 8px; border: 1px solid #0f766e; text-align: center;">NCRs مغلقة</th><th style="padding: 8px; border: 1px solid #0f766e; text-align: center;">دريلات وتدريب</th><th style="padding: 8px; border: 1px solid #0f766e; text-align: center;">نسبة الامتثال</th></tr></thead><tbody>${rows}</tbody></table>`;
     }
 
     function buildTableDrillsHtml() {
@@ -2386,20 +2225,7 @@
           <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold;">${a.status}</td>
         </tr>
       `).join('');
-      return `
-        <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;">
-          <thead>
-            <tr style="background: #1e40af; color: #ffffff;">
-              <th style="padding: 8px; border: 1px solid #1e40af;">كود الطوارئ / الدريل</th>
-              <th style="padding: 8px; border: 1px solid #1e40af;">القسم</th>
-              <th style="padding: 8px; border: 1px solid #1e40af;">المكلف بالتنفيذ</th>
-              <th style="padding: 8px; border: 1px solid #1e40af; text-align: center;">التاريخ</th>
-              <th style="padding: 8px; border: 1px solid #1e40af; text-align: center;">الحالة</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      `;
+      return `<table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;"><thead><tr style="background: #1e40af; color: #ffffff;"><th style="padding: 8px; border: 1px solid #1e40af;">كود الطوارئ / الدريل</th><th style="padding: 8px; border: 1px solid #1e40af;">القسم</th><th style="padding: 8px; border: 1px solid #1e40af;">المكلف بالتنفيذ</th><th style="padding: 8px; border: 1px solid #1e40af; text-align: center;">التاريخ</th><th style="padding: 8px; border: 1px solid #1e40af; text-align: center;">الحالة</th></tr></thead><tbody>${rows}</tbody></table>`;
     }
 
     function buildTableTrainingsHtml() {
@@ -2497,14 +2323,10 @@
               <div>حالة التوثيق: <b>Firebase Live Sync ✓</b></div>
             </div>
           </div>
-
           <div style="text-align: center; margin-bottom: 15px; background: #f1f5f9; padding: 8px; border-radius: 6px;">
             <h3 style="font-size: 14px; font-weight: 900; color: #0f172a; margin: 0;">${reportTitle}</h3>
           </div>
-
           <div>${bodyHtml}</div>
-
-          <!-- 4-Party Executive Signatures Grid -->
           <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 30px; padding-top: 15px; border-top: 2px solid #0f766e; text-align: center; font-size: 11px;">
             <div style="border: 1px dashed #cbd5e1; padding: 10px; border-radius: 6px; background: #fafafa;">
               <div style="font-weight: 900; color: #0f172a;">م/ أحمد نبيه</div>
@@ -2536,7 +2358,6 @@
       document.getElementById('printPreviewModal').classList.remove('hidden');
     }
 
-    // Smart Print & Direct PDF Export Functions (Bypasses Iframe & Sandbox Print Blocks)
     function executeSmartPrint() {
       const content = document.getElementById('printPreviewContent').innerHTML;
       const printWindow = window.open('', '_blank', 'width=1000,height=800');
@@ -2562,15 +2383,11 @@
           </head>
           <body>
             <div class="no-print-bar" style="background:#f1f5f9;padding:10px;margin-bottom:15px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid #cbd5e1;">
-              <span style="font-size:12px;font-weight:bold;color:#0f766e;">🖨️ نافذة الطباعة المباشرة جاهزة - اختر الطابعة أو Save as PDF</span>
+              <span style="font-size:12px;font-weight:bold;color:#0f766e;">🖨️ نافذة الطباعة المباشرة جاهزة</span>
               <button onclick="window.print()" style="background:#0f766e;color:#fff;border:none;padding:8px 18px;border-radius:6px;font-weight:bold;cursor:pointer;">🖨️ اضغط هنا للطباعة الآن</button>
             </div>
             ${content}
-            <script>
-              window.onload = function() {
-                setTimeout(function() { window.focus(); window.print(); }, 350);
-              };
-            <\/script>
+            <script>window.onload = function() { setTimeout(function() { window.focus(); window.print(); }, 350); };<\/script>
           </body>
           </html>
         `);
@@ -2588,15 +2405,15 @@
       if (typeof html2pdf !== 'undefined') {
         if (btn) btn.textContent = "⏳ جاري تجهيز الـ PDF...";
         const opt = {
-          margin:       [8, 8, 8, 8],
-          filename:     'تقرير_السلامة_مستشفى_الناس_' + new Date().toISOString().slice(0,10) + '.pdf',
-          image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  { scale: 2, useCORS: true, logging: false },
-          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+          margin: [8, 8, 8, 8],
+          filename: 'تقرير_السلامة_مستشفى_الناس_' + new Date().toISOString().slice(0,10) + '.pdf',
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, logging: false },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
         html2pdf().set(opt).from(element).save().then(() => {
           if (btn) btn.innerHTML = "<span>📥 تحميل ملف PDF مباشر</span>";
-          showToast("✅ تم تحميل ملف الـ PDF بنجاح في جهازك!");
+          showToast("✅ تم تحميل ملف الـ PDF بنجاح!");
         }).catch(() => {
           if (btn) btn.innerHTML = "<span>📥 تحميل ملف PDF مباشر</span>";
           executeSmartPrint();
@@ -2617,7 +2434,7 @@
       showToast("📄 تم تنزيل نسخة التقرير الجاهزة للطباعة!");
     }
 
-    // ================= 9. AUTHENTICATION & PASSWORD VAULT =================
+    // ================= 9. SECURE SESSION & LOGIN AUTH (FIXED & SAFE) =================
     function populateLoginUsers() {
       const select = document.getElementById('loginUserSelect');
       if (!select) return;
@@ -2639,6 +2456,7 @@
         return;
       }
       currentUser = user;
+      // حفظ الجلسة بصمة خاصة بالمستخدم النشط
       localStorage.setItem(STORAGE_KEY_LOGGED_USER, String(user.id));
       document.getElementById('loginOverlay').classList.add('hidden');
       applyUserPermissions();
@@ -2647,9 +2465,13 @@
 
     function handleUserLogout() {
       currentUser = null;
+      // مسح مفتاح الجلسة تماماً من المتصفح لمنع الدخول التلقائي مرة أخرى
       localStorage.removeItem(STORAGE_KEY_LOGGED_USER);
+      localStorage.removeItem('firebase:session::alnas_safety_master_data');
+      
       document.getElementById('loginPasswordInput').value = '';
       document.getElementById('loginOverlay').classList.remove('hidden');
+      showToast("تم تسجيل الخروج بنجاح وتأمين الجلسة 🔒");
     }
 
     function applyUserPermissions() {
@@ -2675,15 +2497,15 @@
       currentUser.password = p1;
       persistAllData();
       closePasswordChangeModal();
-      showToast("🔒 تم حفظ كلمة المرور الجديدة في السحابة وتعمل على كافة أجهزتك!");
+      showToast("🔒 تم حفظ كلمة المرور الجديدة في السحابة!");
     }
 
     function exportScheduleToCsv() {
       let csv = "\uFEFFاليوم,التاريخ الموافق,الشفت,الموقع,المكلف\n";
       (weeklySchedule || []).forEach((d, idx) => {
         const dInfo = getActualDateForDayName(d.day, idx);
-        (d.morningUnits || []).forEach(u => { csv += `"${d.day}","${dInfo.numeric}","صباحي (08:00 AM - 08:00 PM)","${u.location}","${u.officer}"\n`; });
-        (d.nightUnits || []).forEach(u => { csv += `"${d.day}","${dInfo.numeric}","مسائي (08:00 PM - 08:00 AM)","${u.location}","${u.officer}"\n`; });
+        (d.morningUnits || []).forEach(u => { csv += `"${d.day}","${dInfo.numeric}","صباحي","${u.location}","${u.officer}"\n`; });
+        (d.nightUnits || []).forEach(u => { csv += `"${d.day}","${dInfo.numeric}","مسائي","${u.location}","${u.officer}"\n`; });
       });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement("a");
@@ -2709,15 +2531,24 @@
       syncKpiKeysWithTeam();
       updateCairoTimeAndCalendar();
       setInterval(updateCairoTimeAndCalendar, 1000);
+      populateLoginUsers();
+
+      // التحقق الأمني من الجلسة:
+      // إذا لم يكن هناك مستخدم مسجل دخول مسبقاً، تظهر شاشة اللوجين الإجبارية لمنع الفتح المباشر
       const savedUserId = localStorage.getItem(STORAGE_KEY_LOGGED_USER);
       if (savedUserId) {
         const found = activeTeam.find(u => String(u.id) === String(savedUserId));
-        currentUser = found || activeTeam[0];
-      } else {
-        currentUser = activeTeam[0];
+        if (found) {
+          currentUser = found;
+          document.getElementById('loginOverlay').classList.add('hidden');
+          applyUserPermissions();
+          return;
+        }
       }
-      document.getElementById('loginOverlay').classList.add('hidden');
-      applyUserPermissions();
+
+      // إذا لم يوجد مستخدم مسجل، يظل الأوبن لود مفتوحاً يطلب تسجيل الدخول
+      currentUser = null;
+      document.getElementById('loginOverlay').classList.remove('hidden');
     };
   </script>
 </body>
