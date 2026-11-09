@@ -2549,7 +2549,70 @@
       // إذا لم يوجد مستخدم مسجل، يظل الأوبن لود مفتوحاً يطلب تسجيل الدخول
       currentUser = null;
       document.getElementById('loginOverlay').classList.remove('hidden');
-    };
+    }; async function submitInspection(inspectionData) {
+    const db = firebase.firestore();
+    const batch = db.batch();
+
+    try {
+        const inspectionRef = db.collection('inspections').doc();
+        const inspectionId = inspectionRef.id;
+
+        let hasNonCompliance = false;
+        let nonCompliantItems = [];
+
+        inspectionData.items.forEach(item => {
+            if (item.status === 'non-compliant') {
+                hasNonCompliance = true;
+                nonCompliantItems.push(item);
+            }
+        });
+
+        const inspectionPayload = {
+            inspectionId: inspectionId,
+            zoneId: inspectionData.zoneId,
+            inspectorId: inspectionData.inspectorId,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            items: inspectionData.items,
+            overallStatus: hasNonCompliance ? 'Action Required' : 'Compliant'
+        };
+
+        batch.set(inspectionRef, inspectionPayload);
+
+        if (hasNonCompliance) {
+            const ncrRef = db.collection('ncrs').doc();
+            const ncrPayload = {
+                ncrId: ncrRef.id,
+                inspectionId: inspectionId,
+                zoneId: inspectionData.zoneId,
+                reportedBy: inspectionData.inspectorId,
+                violations: nonCompliantItems,
+                status: 'Open',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                assignedTo: inspectionData.assignedTechnician || 'Unassigned'
+            };
+            batch.set(ncrRef, ncrPayload);
+
+            const zoneRef = db.collection('zones').doc(inspectionData.zoneId);
+            batch.update(zoneRef, { 
+                currentStatus: 'Action Required',
+                lastInspected: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } else {
+            const zoneRef = db.collection('zones').doc(inspectionData.zoneId);
+            batch.update(zoneRef, { 
+                currentStatus: 'Safe',
+                lastInspected: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+
+        await batch.commit();
+        return { success: true, inspectionId };
+
+    } catch (error) {
+        console.error("خطأ أثناء حفظ الفحص:", error);
+        return { success: false, error: error.message };
+    }
+}
   </script>
 </body>
 </html>
