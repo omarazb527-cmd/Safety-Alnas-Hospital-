@@ -490,7 +490,40 @@
     <!-- Tab 6.5: REPORTS CENTER TAB -->
     <section id="reportsCenterTab" class="tab-content hidden space-y-4">
       <div class="dark-panel rounded-2xl p-5 shadow-2xl border border-slate-800 space-y-5">
+        <div class="pb-3 border-b border-slate-800"><section id="reportsCenterTab" class="tab-content hidden space-y-4">
+    <div class="dark-panel rounded-2xl p-5 shadow-2xl border border-slate-800 space-y-5">
+
+        <!-- ⬇️ ضيف خانة الفلتر هنا بالضبط ⬇️ -->
+        <div class="card-glass p-4 rounded-xl border border-teal-500/40 mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <span class="text-teal-400 text-sm font-bold">📅 فلترة التقارير بالأرشيف الزمني:</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+                <div>
+                    <label class="text-slate-300 ml-1">الشهر:</label>
+                    <select id="filterReportMonth" class="bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-white outline-none">
+                        <option value="all">كل الأشهر (سجل كامل)</option>
+                        <option value="10">أكتوبر (10) 2025</option>
+                        <option value="11">نوفمبر (11) 2025</option>
+                        <option value="12">ديسمبر (12) 2025</option>
+                        <option value="01">يناير (01) 2027</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-slate-300 ml-1">السنة:</label>
+                    <select id="filterReportYear" class="bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-white outline-none">
+                        <option value="2027" selected>2027</option>
+                        <option value="2026">2026</option>
+                        <option value="2025">2025</option>
+                    </select>
+                </div>
+                <button onclick="applyReportDateFilter()" class="px-3 py-1.5 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-lg transition">تطبيق الفلتر 🔍</button>
+            </div>
+        </div>
+        <!-- ⬆️ نهاية خانة الفلتر ⬆️ -->
+
         <div class="pb-3 border-b border-slate-800">
+            <h2 class="text-base font-black text-white">🖨️ مركز التقارير الرسمية المعتمدة...</h2>
           <h2 class="text-base font-black text-white">🖨️ مركز التقارير الرسمية المعتمدة (المنفصلة والتقرير الشامل المجمع)</h2>
           <p class="text-xs text-slate-400 mt-1">اختر أي تقرير لطباعته بشكل مستقل لوحده، أو اختر التقرير الشامل المجمع في الأسفل لطباعة كافة أعمال القسم بالتوقيعات الرباعية</p>
         </div>
