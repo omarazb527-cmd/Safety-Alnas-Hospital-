@@ -24,7 +24,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
-    /* Built-in Core & Fallback Dark Theme Styles */
     *, ::before, ::after { box-sizing: border-box; font-family: 'Cairo', 'Inter', system-ui, sans-serif; }
     html, body {
       margin: 0;
@@ -2434,7 +2433,7 @@
       showToast("📄 تم تنزيل نسخة التقرير الجاهزة للطباعة!");
     }
 
-    // ================= 9. SECURE SESSION & LOGIN AUTH (FIXED & SAFE) =================
+    // ================= 9. SECURE SESSION & LOGIN AUTH =================
     function populateLoginUsers() {
       const select = document.getElementById('loginUserSelect');
       if (!select) return;
@@ -2456,7 +2455,6 @@
         return;
       }
       currentUser = user;
-      // حفظ الجلسة بصمة خاصة بالمستخدم النشط
       localStorage.setItem(STORAGE_KEY_LOGGED_USER, String(user.id));
       document.getElementById('loginOverlay').classList.add('hidden');
       applyUserPermissions();
@@ -2465,7 +2463,6 @@
 
     function handleUserLogout() {
       currentUser = null;
-      // مسح مفتاح الجلسة تماماً من المتصفح لمنع الدخول التلقائي مرة أخرى
       localStorage.removeItem(STORAGE_KEY_LOGGED_USER);
       localStorage.removeItem('firebase:session::alnas_safety_master_data');
       
@@ -2533,8 +2530,6 @@
       setInterval(updateCairoTimeAndCalendar, 1000);
       populateLoginUsers();
 
-      // التحقق الأمني من الجلسة:
-      // إذا لم يكن هناك مستخدم مسجل دخول مسبقاً، تظهر شاشة اللوجين الإجبارية لمنع الفتح المباشر
       const savedUserId = localStorage.getItem(STORAGE_KEY_LOGGED_USER);
       if (savedUserId) {
         const found = activeTeam.find(u => String(u.id) === String(savedUserId));
@@ -2546,10 +2541,74 @@
         }
       }
 
-      // إذا لم يوجد مستخدم مسجل، يظل الأوبن لود مفتوحاً يطلب تسجيل الدخول
       currentUser = null;
       document.getElementById('loginOverlay').classList.remove('hidden');
     };
+
+    async function submitInspection(inspectionData) {
+      const db = firebase.firestore();
+      const batch = db.batch();
+
+      try {
+        const inspectionRef = db.collection('inspections').doc();
+        const inspectionId = inspectionRef.id;
+
+        let hasNonCompliance = false;
+        let nonCompliantItems = [];
+
+        inspectionData.items.forEach(item => {
+            if (item.status === 'non-compliant') {
+                hasNonCompliance = true;
+                nonCompliantItems.push(item);
+            }
+        });
+
+        const inspectionPayload = {
+            inspectionId: inspectionId,
+            zoneId: inspectionData.zoneId,
+            inspectorId: inspectionData.inspectorId,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            items: inspectionData.items,
+            overallStatus: hasNonCompliance ? 'Action Required' : 'Compliant'
+        };
+
+        batch.set(inspectionRef, inspectionPayload);
+
+        if (hasNonCompliance) {
+            const ncrRef = db.collection('ncrs').doc();
+            const ncrPayload = {
+                ncrId: ncrRef.id,
+                inspectionId: inspectionId,
+                zoneId: inspectionData.zoneId,
+                reportedBy: inspectionData.inspectorId,
+                violations: nonCompliantItems,
+                status: 'Open',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                assignedTo: inspectionData.assignedTechnician || 'Unassigned'
+            };
+            batch.set(ncrRef, ncrPayload);
+
+            const zoneRef = db.collection('zones').doc(inspectionData.zoneId);
+            batch.update(zoneRef, { 
+                currentStatus: 'Action Required',
+                lastInspected: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } else {
+            const zoneRef = db.collection('zones').doc(inspectionData.zoneId);
+            batch.update(zoneRef, { 
+                currentStatus: 'Safe',
+                lastInspected: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+
+        await batch.commit();
+        return { success: true, inspectionId };
+
+      } catch (error) {
+          console.error("خطأ أثناء حفظ الفحص:", error);
+          return { success: false, error: error.message };
+      }
+    }
   </script>
 </body>
 </html>
