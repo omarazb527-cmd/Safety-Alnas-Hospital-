@@ -1538,4 +1538,1580 @@
             </div>
             <div class="flex items-center gap-2">
               ${canEdit
-                ? `<select onchange="updateScheduleOfficer(${dayIndex}, 'nigh
+                ? `<select onchange="updateScheduleOfficer(${dayIndex}, 'night', ${uIdx}, this.value)" class="bg-slate-800 text-indigo-300 font-semibold rounded-lg px-2 py-1.5 text-xs border border-slate-600 outline-none">${buildOfficerOptions(u.officer)}</select>`
+                : `<span class="text-indigo-300 font-semibold text-xs">👤 ${u.officer}</span>`}
+              <button onclick="openChecklistForLocation('${u.location}', '${u.officer}')" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg text-[11px]">📋 فحص</button>
+              ${canEdit ? `<button onclick="deleteScheduleUnit(${dayIndex}, 'night', ${uIdx})" class="p-1.5 bg-rose-950/70 hover:bg-rose-800 text-rose-300 rounded-lg text-xs border border-rose-800">🗑️</button>` : ''}
+            </div>
+          </div>
+        `).join('');
+
+        return `
+          <div class="card-glass rounded-2xl p-4 ${isToday ? 'border-teal-500 ring-2 ring-teal-500/20 bg-slate-800/80' : 'border-slate-800'}">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-700/80">
+              <div class="flex flex-wrap items-center gap-2.5">
+                ${canEdit 
+                  ? `<input type="text" value="${item.day}" onchange="updateScheduleDayName(${dayIndex}, this.value)" class="editable-input text-sm font-black text-white w-28">`
+                  : `<span class="text-base font-black text-white">${item.day}</span>`}
+                <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-900/90 text-teal-300 border border-slate-700">📅 الموافق: ${dateInfo.formattedAr} (${dateInfo.numeric})</span>
+                ${isToday ? '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-teal-500 text-slate-950">اليوم الحالي ⚡</span>' : ''}
+              </div>
+              ${canEdit ? `<button onclick="deleteScheduleDay(${dayIndex})" class="px-2.5 py-1 bg-rose-950/60 hover:bg-rose-900 text-rose-300 rounded-lg text-[10px] font-bold border border-rose-800/60">🗑️ حذف اليوم</button>` : ''}
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs font-bold text-amber-300 px-1">
+                  <span>☀️ الشفت الصباحي (08:00 AM - 08:00 PM)</span>
+                  ${canEdit ? `<button onclick="addNewScheduleUnit(${dayIndex}, 'morning')" class="px-2 py-0.5 bg-amber-950/80 text-amber-300 border border-amber-700/60 rounded text-[10px]">➕ إضافة موقع</button>` : ''}
+                </div>
+                <div class="space-y-2">${morningHtml}</div>
+              </div>
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs font-bold text-indigo-300 px-1">
+                  <span>🌙 الشفت المسائي (08:00 PM - 08:00 AM)</span>
+                  ${canEdit ? `<button onclick="addNewScheduleUnit(${dayIndex}, 'night')" class="px-2 py-0.5 bg-indigo-950/80 text-indigo-300 border border-indigo-700/60 rounded text-[10px]">➕ إضافة موقع</button>` : ''}
+                </div>
+                <div class="space-y-2">${nightHtml}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateScheduleDayName(dayIdx, val) {
+      if (!val.trim()) return;
+      weeklySchedule[dayIdx].day = val.trim();
+      persistAllData();
+      renderAllViews();
+    }
+
+    function addNewDayToSchedule() {
+      weeklySchedule.push({
+        day: "يوم إضافي",
+        morningUnits: [{ location: officialDepartments[0] || "Main OR", officer: fieldInspectors[0]?.name || "مصطفى طارق" }],
+        nightUnits: [{ location: officialDepartments[1] || "CCU", officer: fieldInspectors[1]?.name || "سامح يوسف" }]
+      });
+      persistAllData();
+      renderAllViews();
+    }
+
+    function deleteScheduleDay(dayIdx) {
+      weeklySchedule.splice(dayIdx, 1);
+      persistAllData();
+      renderAllViews();
+    }
+
+    function updateScheduleLocation(dayIdx, shift, uIdx, val) {
+      if (shift === 'morning') weeklySchedule[dayIdx].morningUnits[uIdx].location = val;
+      else weeklySchedule[dayIdx].nightUnits[uIdx].location = val;
+      persistAllData();
+      renderUnifiedPlanView();
+    }
+
+    function updateScheduleOfficer(dayIdx, shift, uIdx, val) {
+      if (shift === 'morning') weeklySchedule[dayIdx].morningUnits[uIdx].officer = val;
+      else weeklySchedule[dayIdx].nightUnits[uIdx].officer = val;
+      persistAllData();
+      renderUnifiedPlanView();
+    }
+
+    function addNewScheduleUnit(dayIdx, shift) {
+      const unit = { location: officialDepartments[0] || "Main OR", officer: fieldInspectors[0]?.name || "مصطفى طارق" };
+      if (shift === 'morning') weeklySchedule[dayIdx].morningUnits.push(unit);
+      else weeklySchedule[dayIdx].nightUnits.push(unit);
+      persistAllData();
+      renderAllViews();
+    }
+
+    function deleteScheduleUnit(dayIdx, shift, uIdx) {
+      if (shift === 'morning') weeklySchedule[dayIdx].morningUnits.splice(uIdx, 1);
+      else weeklySchedule[dayIdx].nightUnits.splice(uIdx, 1);
+      persistAllData();
+      renderAllViews();
+    }
+
+    // ================= 2. CHECKLISTS =================
+    let currentChecklistDepartment = "";
+    let currentChecklistOfficer = "";
+
+    function openChecklistForLocation(loc, officer) {
+      currentChecklistDepartment = loc;
+      currentChecklistOfficer = officer || (currentUser ? currentUser.name : "مصطفى طارق");
+      document.getElementById('checklistModalTitle').textContent = `قائمة الفحص الميداني: ${loc}`;
+      document.getElementById('checklistOfficerName').textContent = currentChecklistOfficer;
+      renderChecklistQuestionsInsideModal();
+      document.getElementById('checklistModal').classList.remove('hidden');
+    }
+
+    function renderChecklistQuestionsInsideModal() {
+      const canEdit = isMasterAdmin();
+      document.getElementById('checklistItemsContainer').innerHTML = standardChecklistQuestions.map((q, idx) => `
+        <div class="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/80 space-y-2">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="flex-1 space-y-1.5">
+              <div class="flex items-center gap-2">
+                ${canEdit
+                  ? `<input type="text" value="${q.category}" onchange="updateChecklistQuestionField(${idx}, 'category', this.value)" class="editable-input text-[10px] font-bold text-teal-300 w-44">
+                     <button onclick="deleteChecklistQuestion(${idx})" class="text-rose-400 hover:text-rose-300 text-xs">🗑️ حذف البند</button>`
+                  : `<span class="text-[10px] font-bold text-teal-300">${q.category}</span>`}
+              </div>
+              ${canEdit
+                ? `<input type="text" value="${q.text}" onchange="updateChecklistQuestionField(${idx}, 'text', this.value)" class="editable-input text-xs font-semibold text-white w-full font-inter">`
+                : `<div class="text-xs font-semibold text-white font-inter">${q.text}</div>`}
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0" dir="ltr">
+              <label class="cursor-pointer"><input type="radio" name="chk_${idx}" value="M" checked onchange="calculateChecklistScore()" class="peer sr-only"><span class="px-2.5 py-1 rounded text-[11px] font-bold bg-slate-700 text-slate-300 peer-checked:bg-emerald-600 peer-checked:text-white transition">مطابق M</span></label>
+              <label class="cursor-pointer"><input type="radio" name="chk_${idx}" value="NM" onchange="calculateChecklistScore()" class="peer sr-only"><span class="px-2.5 py-1 rounded text-[11px] font-bold bg-slate-700 text-slate-300 peer-checked:bg-rose-600 peer-checked:text-white transition">غير مطابق NM</span></label>
+            </div>
+          </div>
+          <input type="text" id="chk_note_${idx}" placeholder="أدخل ملاحظات الفحص أو سبب عدم المطابقة..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white outline-none">
+        </div>
+      `).join('');
+      calculateChecklistScore();
+    }
+
+    function updateChecklistQuestionField(idx, field, val) {
+      standardChecklistQuestions[idx][field] = val;
+      persistAllData();
+    }
+
+    function addNewQuestionToChecklist() {
+      standardChecklistQuestions.push({ id: Date.now(), category: "Safety Standard", text: "New inspection item" });
+      persistAllData();
+      renderChecklistQuestionsInsideModal();
+    }
+
+    function deleteChecklistQuestion(idx) {
+      if (standardChecklistQuestions.length <= 1) return;
+      standardChecklistQuestions.splice(idx, 1);
+      persistAllData();
+      renderChecklistQuestionsInsideModal();
+    }
+
+    function openEditChecklistQuestionsModal() {
+      openChecklistForLocation(officialDepartments[0] || "Main OR", currentUser ? currentUser.name : "م/ عمر فريد العزب");
+    }
+
+    function calculateChecklistScore() {
+      let total = standardChecklistQuestions.length;
+      let passed = 0;
+      standardChecklistQuestions.forEach((q, idx) => {
+        const sel = document.querySelector(`input[name="chk_${idx}"]:checked`);
+        if (!sel || sel.value === 'M') passed++;
+      });
+      const score = total > 0 ? Math.round((passed / total) * 100) : 100;
+      const badge = document.getElementById('checklistScoreBadge');
+      if (badge) badge.textContent = score + '%';
+      return score;
+    }
+
+    function closeChecklistModal() { document.getElementById('checklistModal').classList.add('hidden'); }
+
+    function saveInspectionChecklist() {
+      let createdNcrs = 0;
+      const score = calculateChecklistScore();
+      standardChecklistQuestions.forEach((q, idx) => {
+        const val = document.querySelector(`input[name="chk_${idx}"]:checked`)?.value;
+        const note = document.getElementById(`chk_note_${idx}`)?.value.trim();
+        if (val === 'NM') {
+          createdNcrs++;
+          ncrList.unshift({
+            id: nextSeqId(ncrList, 'NCR'),
+            dept: currentChecklistDepartment,
+            desc: note || `Non-compliance in: ${q.text}`,
+            risk: "Medium 🟡",
+            responsible: currentChecklistOfficer,
+            dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
+            createdAt: fmtD(new Date()),
+            status: "Open",
+            photo: ""
+          });
+        }
+      });
+
+      const inspectorName = (currentUser && !currentUser.isManager && !currentUser.isLeader) ? currentUser.name : currentChecklistOfficer;
+      const officer = fieldInspectors.find(u => u.name === inspectorName) || fieldInspectors.find(u => u.name === currentChecklistOfficer);
+      if (officer) {
+        if (!officersKpis[officer.id]) officersKpis[officer.id] = { inspections: 0, ncrsClosed: 0, drills: 0 };
+        officersKpis[officer.id].inspections += 1;
+      }
+
+      inspectionLogsList.unshift({
+        id: Date.now(),
+        dateTime: new Date().toLocaleString('ar-EG'),
+        dept: currentChecklistDepartment,
+        officer: officer ? officer.name : inspectorName,
+        score: score,
+        ncrsCount: createdNcrs
+      });
+
+      persistAllData();
+      renderAllViews();
+      closeChecklistModal();
+      showToast(`✅ تم تسجيل نتيجة الفحص (${score}%) وربطها مباشرة بـ KPIs المفتش!`);
+    }
+
+    function renderChecklistsGrid() {
+      const container = document.getElementById('checklistsGrid');
+      if (!container) return;
+      const canEdit = isMasterAdmin();
+      container.innerHTML = (officialDepartments || []).map((dept, idx) => `
+        <div class="card-glass p-3.5 rounded-xl border border-slate-700/80 hover:border-teal-500 transition shadow flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-xs font-black text-white font-inter">📍 ${dept}</span>
+              ${canEdit ? `
+              <div class="flex items-center gap-1">
+                <button onclick="handleEditDepartmentName(${idx})" title="تعديل اسم الموقع" class="text-slate-400 hover:text-teal-300 text-xs p-1">✏️</button>
+                <button onclick="handleDeleteDepartment(${idx})" title="حذف الموقع" class="text-slate-400 hover:text-rose-400 text-xs p-1">🗑️</button>
+              </div>` : ''}
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1">قائمة تدقيق السلامة المعتمدة (GAHAR / NFPA)</p>
+          </div>
+          <button onclick="openChecklistForLocation('${dept}', '${currentUser ? currentUser.name : 'مصطفى طارق'}')" class="mt-3 w-full py-1.5 bg-slate-800 hover:bg-teal-600 text-teal-300 hover:text-white rounded-lg text-xs font-bold transition border border-slate-700">
+            📋 بدء التفتيش الميداني
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function handleEditDepartmentName(idx) {
+      const oldName = officialDepartments[idx];
+      const newName = prompt("تعديل اسم القسم / الموقع:", oldName);
+      if (newName && newName.trim()) {
+        officialDepartments[idx] = newName.trim();
+        persistAllData();
+        renderAllViews();
+      }
+    }
+
+    function handleDeleteDepartment(idx) {
+      officialDepartments.splice(idx, 1);
+      persistAllData();
+      renderAllViews();
+    }
+
+    function openAddDepartmentModal() { document.getElementById('departmentModal').classList.remove('hidden'); }
+    function closeDepartmentModal() { document.getElementById('departmentModal').classList.add('hidden'); }
+    function handleSaveDepartment() {
+      const val = document.getElementById('modalDeptNameInput').value.trim();
+      if (!val) return;
+      officialDepartments.push(val);
+      persistAllData();
+      renderAllViews();
+      closeDepartmentModal();
+    }
+
+    // ================= 3. ACTIVITIES & DRILLS =================
+    function renderActivitiesTable() {
+      const tbody = document.getElementById('activitiesTableBody');
+      if (!tbody) return;
+      const canEdit = isMasterAdmin();
+      tbody.innerHTML = (activitiesList || []).map((a, idx) => `
+        <tr class="border-b border-slate-800 hover:bg-slate-800/40">
+          <td class="p-2">${canEdit ? `<input type="text" value="${a.title}" onchange="updateDrillField(${idx}, 'title', this.value)" class="editable-input w-full font-bold text-teal-300 text-xs">` : `<span class="font-bold text-teal-300">${a.title}</span>`}</td>
+          <td class="p-2">${canEdit ? `<select onchange="updateDrillField(${idx}, 'dept', this.value)" class="editable-input w-full font-inter text-xs">${buildLocationOptions(a.dept)}</select>` : `<span class="font-inter font-bold text-white">📍 ${a.dept}</span>`}</td>
+          <td class="p-2">${canEdit ? `<select onchange="updateDrillField(${idx}, 'trainer', this.value)" class="editable-input w-full text-xs">${buildOfficerOptions(a.trainer)}</select>` : `<span class="text-slate-200">👤 ${a.trainer}</span>`}</td>
+          <td class="p-2">${canEdit ? `<input type="date" value="${a.date}" onchange="updateDrillField(${idx}, 'date', this.value)" class="editable-input font-mono text-xs">` : `<span class="font-mono text-slate-400">${a.date}</span>`}</td>
+          <td class="p-2">
+            ${canEdit ? `
+            <select onchange="updateDrillField(${idx}, 'status', this.value)" class="editable-input text-xs font-bold ${a.status.includes('تم') ? 'text-emerald-300' : 'text-amber-300'}">
+              <option value="مجدول ⏳" ${a.status.includes('مجدول') ? 'selected' : ''}>مجدول ⏳</option>
+              <option value="تم التنفيذ بنجاح ✓" ${a.status.includes('تم') ? 'selected' : ''}>تم التنفيذ بنجاح ✓</option>
+            </select>` : `<span class="font-bold ${a.status.includes('تم') ? 'text-emerald-300' : 'text-amber-300'}">${a.status}</span>`}
+          </td>
+          <td class="p-2 text-center">
+            <div class="flex items-center justify-center gap-1">
+              <button onclick="completeDrillItem(${idx})" class="px-2 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded text-[10px] font-bold">✓ تم التنفيذ</button>
+              ${canEdit ? `<button onclick="deleteDrillItem(${idx})" class="p-1 bg-rose-950 text-rose-300 rounded text-xs">🗑️</button>` : ''}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateDrillField(idx, field, val) {
+      activitiesList[idx][field] = val;
+      persistAllData();
+      renderAllViews();
+    }
+
+    function openDrillModal(editIdx = -1) {
+      document.getElementById('drillEditIndex').value = editIdx;
+      document.getElementById('drillDeptSelect').innerHTML = buildLocationOptions(officialDepartments[0]);
+      document.getElementById('drillTrainerSelect').innerHTML = buildOfficerOptions(fieldInspectors[0]?.name);
+      document.getElementById('drillDateInput').value = new Date().toISOString().split('T')[0];
+      document.getElementById('drillModal').classList.remove('hidden');
+    }
+
+    function closeDrillModal() { document.getElementById('drillModal').classList.add('hidden'); }
+
+    function saveDrillForm() {
+      const title = document.getElementById('drillTitleSelect').value;
+      const dept = document.getElementById('drillDeptSelect').value;
+      const trainer = document.getElementById('drillTrainerSelect').value;
+      const date = document.getElementById('drillDateInput').value;
+      const status = document.getElementById('drillStatusSelect').value;
+      activitiesList.unshift({ id: Date.now(), title, dept, trainer, date, status });
+      persistAllData();
+      renderAllViews();
+      closeDrillModal();
+    }
+
+    function completeDrillItem(idx) {
+      const drill = activitiesList[idx];
+      if (!drill) return;
+      drill.status = "تم التنفيذ بنجاح ✓";
+      drill.completedAt = fmtD(new Date());
+      const off = fieldInspectors.find(u => u.name === drill.trainer);
+      if (off) {
+        if (!officersKpis[off.id]) officersKpis[off.id] = { inspections: 0, ncrsClosed: 0, drills: 0 };
+        officersKpis[off.id].drills += 1;
+      }
+      persistAllData();
+      renderAllViews();
+      showToast("🚨 تم توثيق الدريل وإضافته لمؤشر KPIs للمفتش!");
+    }
+
+    function deleteDrillItem(idx) {
+      activitiesList.splice(idx, 1);
+      persistAllData();
+      renderAllViews();
+    }
+
+    // ================= 4. NCRs TRACKER =================
+    function renderNcrTable() {
+      const tbody = document.getElementById('ncrTableBody');
+      if (!tbody) return;
+      const canEdit = isMasterAdmin();
+      if (!ncrList || ncrList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">لا توجد تقارير عدم مطابقة مفتوحة حالياً.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = ncrList.map((ncr, idx) => `
+        <tr class="border-b border-slate-800 hover:bg-slate-800/40">
+          <td class="p-2">${canEdit ? `<input type="text" value="${ncr.id}" onchange="updateNcrInlineField(${idx}, 'id', this.value)" class="editable-input font-mono font-bold text-rose-400 w-24 text-xs">` : `<span class="font-mono font-bold text-rose-400">${ncr.id}</span>`}</td>
+          <td class="p-2">${canEdit ? `<select onchange="updateNcrInlineField(${idx}, 'dept', this.value)" class="editable-input font-inter text-xs w-36">${buildLocationOptions(ncr.dept)}</select>` : `<span class="font-inter font-bold">${ncr.dept}</span>`}</td>
+          <td class="p-2">${canEdit ? `<input type="text" value="${ncr.desc}" onchange="updateNcrInlineField(${idx}, 'desc', this.value)" class="editable-input text-slate-100 w-full text-xs">` : `<span>${ncr.desc}</span>`}</td>
+          <td class="p-2 text-center">${ncr.photo ? `<img src="${ncr.photo}" class="w-10 h-10 object-cover rounded mx-auto">` : '-'}</td>
+          <td class="p-2">${canEdit ? `<select onchange="updateNcrInlineField(${idx}, 'risk', this.value)" class="editable-input text-xs text-amber-300 font-bold"><option value="High 🔴" ${ncr.risk.includes('High')?'selected':''}>High 🔴</option><option value="Medium 🟡" ${ncr.risk.includes('Medium')?'selected':''}>Medium 🟡</option><option value="Low 🟢" ${ncr.risk.includes('Low')?'selected':''}>Low 🟢</option></select>` : `<span class="text-amber-300 font-bold">${ncr.risk}</span>`}</td>
+          <td class="p-2">${canEdit ? `<select onchange="updateNcrInlineField(${idx}, 'responsible', this.value)" class="editable-input text-xs text-teal-300">${buildOfficerOptions(ncr.responsible)}</select>` : `<span class="text-teal-300">${ncr.responsible}</span>`}</td>
+          <td class="p-2">${canEdit ? `<input type="date" value="${ncr.dueDate}" onchange="updateNcrInlineField(${idx}, 'dueDate', this.value)" class="editable-input font-mono text-xs">` : `<span class="font-mono">${ncr.dueDate}</span>`}</td>
+          <td class="p-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${ncr.status === 'Closed' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">${ncr.status}</span></td>
+          <td class="p-2 text-center">
+            <div class="flex items-center justify-center gap-1">
+              <button onclick="toggleNcrStatus(${idx})" class="px-2 py-1 bg-emerald-700 text-white rounded text-[10px] font-bold">${ncr.status === 'Closed' ? 'فتح' : '✓ إغلاق'}</button>
+              <button onclick="openNcrModal(${idx})" class="p-1 bg-slate-700 text-slate-200 rounded text-xs">📷</button>
+              ${canEdit ? `<button onclick="deleteNcrItem(${idx})" class="p-1 bg-rose-950 text-rose-300 rounded text-xs">🗑️</button>` : ''}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateNcrInlineField(idx, field, val) {
+      ncrList[idx][field] = val;
+      persistAllData();
+    }
+
+    function openNcrModal(editIdx = -1) {
+      document.getElementById('ncrEditIndex').value = editIdx;
+      document.getElementById('ncrDeptSelect').innerHTML = buildLocationOptions(officialDepartments[0]);
+      document.getElementById('ncrRespSelect').innerHTML = buildOfficerOptions(fieldInspectors[0]?.name);
+      document.getElementById('ncrPhotoInput').value = "";
+
+      if (editIdx >= 0 && ncrList[editIdx]) {
+        const item = ncrList[editIdx];
+        document.getElementById('ncrDeptSelect').value = item.dept;
+        document.getElementById('ncrRiskSelect').value = item.risk;
+        document.getElementById('ncrDescInput').value = item.desc;
+        document.getElementById('ncrRespSelect').value = item.responsible;
+        document.getElementById('ncrDueDateInput').value = item.dueDate;
+        document.getElementById('ncrStatusSelect').value = item.status;
+      } else {
+        document.getElementById('ncrDescInput').value = "";
+        document.getElementById('ncrDueDateInput').value = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
+        document.getElementById('ncrStatusSelect').value = "Open";
+      }
+      document.getElementById('ncrModal').classList.remove('hidden');
+    }
+
+    function closeNcrModal() { document.getElementById('ncrModal').classList.add('hidden'); }
+
+    function readPhotoAsBase64(fileInput, callback) {
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) { callback(e.target.result); };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        callback(null);
+      }
+    }
+
+    function saveNcrForm() {
+      const editIdx = parseInt(document.getElementById('ncrEditIndex').value);
+      const dept = document.getElementById('ncrDeptSelect').value;
+      const risk = document.getElementById('ncrRiskSelect').value;
+      const desc = document.getElementById('ncrDescInput').value.trim();
+      const responsible = document.getElementById('ncrRespSelect').value;
+      const dueDate = document.getElementById('ncrDueDateInput').value;
+      const status = document.getElementById('ncrStatusSelect').value;
+      const photoInput = document.getElementById('ncrPhotoInput');
+      const _prevNcrStatus = (editIdx >= 0 && ncrList[editIdx]) ? ncrList[editIdx].status : null;
+
+      if (!desc) { showToast("يرجى كتابة وصف الملاحظة.", true); return; }
+
+      readPhotoAsBase64(photoInput, (base64Img) => {
+        if (editIdx >= 0 && ncrList[editIdx]) {
+          ncrList[editIdx] = {
+            ...ncrList[editIdx],
+            dept, risk, desc, responsible, dueDate, status,
+            photo: base64Img || ncrList[editIdx].photo || ""
+          };
+        } else {
+          ncrList.unshift({
+            id: nextSeqId(ncrList, 'NCR'),
+            dept, risk, desc, responsible, dueDate, status, createdAt: fmtD(new Date()),
+            photo: base64Img || ""
+          });
+        }
+        { const _n = (editIdx >= 0 && ncrList[editIdx]) ? ncrList[editIdx] : ncrList[0];
+          if (_n) { if (_n.status === 'Closed') { if (_prevNcrStatus !== 'Closed') _n.closedAt = fmtD(new Date()); } else { delete _n.closedAt; } } }
+        persistAllData();
+        renderAllViews();
+        closeNcrModal();
+      });
+    }
+
+    function toggleNcrStatus(idx) {
+      const ncr = ncrList[idx];
+      if (!ncr) return;
+      if (ncr.status !== "Closed") {
+        ncr.status = "Closed";
+        ncr.closedAt = fmtD(new Date());
+        const off = fieldInspectors.find(u => u.name === ncr.responsible);
+        if (off) {
+          if (!officersKpis[off.id]) officersKpis[off.id] = { inspections: 0, ncrsClosed: 0, drills: 0 };
+          officersKpis[off.id].ncrsClosed += 1;
+        }
+      } else {
+        ncr.status = "Open";
+        delete ncr.closedAt;
+      }
+      persistAllData();
+      renderAllViews();
+    }
+
+    function deleteNcrItem(idx) {
+      ncrList.splice(idx, 1);
+      persistAllData();
+      renderAllViews();
+    }
+
+    // ================= 5. INCIDENTS LOG =================
+    function renderIncidentsTable() {
+      const tbody = document.getElementById('incidentsTableBody');
+      if (!tbody) return;
+      const canEdit = isMasterAdmin();
+      if (!incidentsList || incidentsList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-emerald-400 font-bold">🛡️ بيئة عمل آمنة - سجل خالي من الحوادث (Zero Accidents).</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = incidentsList.map((inc, idx) => `
+        <tr class="border-b border-slate-800 hover:bg-slate-800/40">
+          <td class="p-2">${canEdit ? `<input type="text" value="${inc.id}" onchange="updateIncidentInlineField(${idx}, 'id', this.value)" class="editable-input font-mono font-bold text-amber-400 w-24 text-xs">` : `<span class="font-mono font-bold text-amber-400">${inc.id}</span>`}</td>
+          <td class="p-2">${canEdit ? `<input type="text" value="${inc.dateTime}" onchange="updateIncidentInlineField(${idx}, 'dateTime', this.value)" class="editable-input font-mono text-[11px] w-36">` : `<span class="font-mono">${inc.dateTime}</span>`}</td>
+          <td class="p-2 space-y-1">${canEdit ? `<input type="text" value="${inc.person}" onchange="updateIncidentInlineField(${idx}, 'person', this.value)" class="editable-input font-bold text-white w-full text-xs"><input type="text" value="${inc.job}" onchange="updateIncidentInlineField(${idx}, 'job', this.value)" class="editable-input text-[10px] text-teal-300 w-full">` : `<div class="font-bold text-white">${inc.person}</div><div class="text-[10px] text-teal-300">${inc.job}</div>`}</td>
+          <td class="p-2">${canEdit ? `<input type="text" value="${inc.type}" onchange="updateIncidentInlineField(${idx}, 'type', this.value)" class="editable-input text-amber-300 font-bold text-xs w-40">` : `<span class="text-amber-300 font-bold">${inc.type}</span>`}</td>
+          <td class="p-2">${canEdit ? `<select onchange="updateIncidentInlineField(${idx}, 'location', this.value)" class="editable-input font-inter text-xs w-36">${buildLocationOptions(inc.location)}</select>` : `<span class="font-inter">📍 ${inc.location}</span>`}</td>
+          <td class="p-2 text-center">${inc.photo ? `<img src="${inc.photo}" class="w-10 h-10 object-cover rounded mx-auto">` : '-'}</td>
+          <td class="p-2 text-center">${canEdit ? `<input type="number" min="0" value="${inc.lostDays}" onchange="updateIncidentInlineField(${idx}, 'lostDays', this.value)" class="editable-input text-center font-bold text-emerald-400 w-16 text-xs">` : `<span class="font-bold text-emerald-400">${inc.lostDays}</span>`}</td>
+          <td class="p-2 text-center">
+            <div class="flex items-center justify-center gap-1">
+              <button onclick="openIncidentModal(${idx})" class="p-1 bg-slate-700 text-slate-200 rounded text-xs">📷</button>
+              ${canEdit ? `<button onclick="deleteIncidentItem(${idx})" class="p-1 bg-rose-950 text-rose-300 rounded text-xs">🗑️</button>` : ''}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateIncidentInlineField(idx, field, val) {
+      incidentsList[idx][field] = val;
+      persistAllData();
+    }
+
+    function openIncidentModal(editIdx = -1) {
+      document.getElementById('incidentEditIndex').value = editIdx;
+      document.getElementById('incLocSelect').innerHTML = buildLocationOptions(officialDepartments[0]);
+      document.getElementById('incPhotoInput').value = "";
+
+      if (editIdx >= 0 && incidentsList[editIdx]) {
+        const inc = incidentsList[editIdx];
+        document.getElementById('incPersonInput').value = inc.person;
+        document.getElementById('incJobInput').value = inc.job;
+        document.getElementById('incLocSelect').value = inc.location;
+        document.getElementById('incTypeSelect').value = inc.type;
+        document.getElementById('incDateTimeInput').value = inc.dateTime;
+        document.getElementById('incLostDaysInput').value = inc.lostDays;
+      } else {
+        document.getElementById('incPersonInput').value = "";
+        document.getElementById('incJobInput').value = "";
+        document.getElementById('incDateTimeInput').value = new Date().toISOString().slice(0, 16).replace('T', ' ');
+        document.getElementById('incLostDaysInput').value = 0;
+      }
+      document.getElementById('incidentModal').classList.remove('hidden');
+    }
+
+    function closeIncidentModal() { document.getElementById('incidentModal').classList.add('hidden'); }
+
+    function saveIncidentForm() {
+      const editIdx = parseInt(document.getElementById('incidentEditIndex').value);
+      const person = document.getElementById('incPersonInput').value.trim();
+      const job = document.getElementById('incJobInput').value.trim() || "غير محدد";
+      const location = document.getElementById('incLocSelect').value;
+      const type = document.getElementById('incTypeSelect').value;
+      const dateTime = document.getElementById('incDateTimeInput').value.trim();
+      const lostDays = parseInt(document.getElementById('incLostDaysInput').value) || 0;
+      const photoInput = document.getElementById('incPhotoInput');
+
+      if (!person) { showToast("يرجى إدخال اسم المصاب.", true); return; }
+
+      readPhotoAsBase64(photoInput, (base64Img) => {
+        if (editIdx >= 0 && incidentsList[editIdx]) {
+          incidentsList[editIdx] = {
+            ...incidentsList[editIdx],
+            person, job, location, type, dateTime, lostDays,
+            photo: base64Img || incidentsList[editIdx].photo || ""
+          };
+        } else {
+          incidentsList.unshift({
+            id: nextSeqId(incidentsList, 'INC'),
+            person, job, location, type, dateTime, lostDays,
+            photo: base64Img || ""
+          });
+        }
+        persistAllData();
+        renderAllViews();
+        closeIncidentModal();
+      });
+    }
+
+    function deleteIncidentItem(idx) {
+      incidentsList.splice(idx, 1);
+      persistAllData();
+      renderAllViews();
+    }
+
+    // ================= 6. KPIs MATRIX =================
+    function calculateOfficerCompliance(kpi) {
+      const ins = Number(kpi.inspections || 0);
+      const ncrs = Number(kpi.ncrsClosed || 0);
+      const drills = Number(kpi.drills || 0);
+      if (ins === 0 && ncrs === 0 && drills === 0) return 0;
+      return Math.min(100, Math.round(((ins * 10) + (ncrs * 8) + (drills * 15)) / 1.5));
+    }
+
+    function renderKpisTable() {
+      const tbody = document.getElementById('kpisTableBody');
+      if (!tbody) return;
+      syncKpiKeysWithTeam();
+      const canEdit = isMasterAdmin();
+
+      tbody.innerHTML = fieldInspectors.map((officer, index) => {
+        const kpi = officersKpis[officer.id] || { inspections: 0, ncrsClosed: 0, drills: 0 };
+        const score = calculateOfficerCompliance(kpi);
+
+        return `
+          <tr class="border-b border-slate-800 hover:bg-slate-800/40">
+            <td class="p-3 text-center text-slate-400 font-bold">${index + 1}</td>
+            <td class="p-2">${canEdit ? `<input type="text" value="${officer.name}" onchange="updateMemberInline(${officer.id}, 'name', this.value)" class="editable-input font-bold text-white text-xs w-44">` : `<span class="font-bold text-white">${officer.name}</span>`}</td>
+            <td class="p-2">${canEdit ? `<input type="text" value="${officer.role}" onchange="updateMemberInline(${officer.id}, 'role', this.value)" class="editable-input font-semibold text-teal-400 font-inter text-xs w-36">` : `<span class="text-teal-400 font-inter">${officer.role}</span>`}</td>
+            <td class="p-2 text-center">${canEdit ? `<input type="number" min="0" value="${kpi.inspections}" onchange="updateOfficerKpi(${officer.id}, 'inspections', this.value)" class="w-16 bg-slate-900 border border-teal-700 rounded-lg p-1.5 text-center text-xs text-teal-300 font-bold outline-none">` : `<span class="font-bold text-teal-300">${kpi.inspections}</span>`}</td>
+            <td class="p-2 text-center">${canEdit ? `<input type="number" min="0" value="${kpi.ncrsClosed}" onchange="updateOfficerKpi(${officer.id}, 'ncrsClosed', this.value)" class="w-16 bg-slate-900 border border-blue-700 rounded-lg p-1.5 text-center text-xs text-blue-300 font-bold outline-none">` : `<span class="font-bold text-blue-300">${kpi.ncrsClosed}</span>`}</td>
+            <td class="p-2 text-center">${canEdit ? `<input type="number" min="0" value="${kpi.drills}" onchange="updateOfficerKpi(${officer.id}, 'drills', this.value)" class="w-16 bg-slate-900 border border-amber-700 rounded-lg p-1.5 text-center text-xs text-amber-300 font-bold outline-none">` : `<span class="font-bold text-amber-300">${kpi.drills}</span>`}</td>
+            <td class="p-3 text-center font-black text-white">${score}%</td>
+            <td class="p-3 text-center"><span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${score >= 85 ? 'bg-emerald-500/20 text-emerald-300' : (score >= 50 ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-700 text-slate-300')}">${score >= 85 ? 'ممتاز ★★★' : (score >= 50 ? 'جيد جداً ★★' : 'قيد التقييم')}</span></td>
+            ${canEdit ? `
+            <td class="p-3 text-center">
+              <div class="flex items-center justify-center gap-1">
+                <button onclick="deleteOfficerKpiData(${officer.id})" class="px-2 py-1 bg-amber-950 text-amber-300 rounded text-[10px]">تصفير</button>
+                <button onclick="handleDeleteMember(${officer.id})" class="px-2 py-1 bg-rose-950 text-rose-300 rounded text-[10px]">🗑️</button>
+              </div>
+            </td>` : ''}
+          </tr>
+        `;
+      }).join('');
+
+      const logsBody = document.getElementById('inspectionLogsTableBody');
+      if (logsBody) {
+        if (!inspectionLogsList || inspectionLogsList.length === 0) {
+          logsBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">لم يتم تسجيل جولات فحص ميدانية بعد.</td></tr>`;
+        } else {
+          logsBody.innerHTML = inspectionLogsList.slice(0, 20).map(log => `
+            <tr class="border-b border-slate-800">
+              <td class="p-2.5 font-mono text-slate-400">${log.dateTime}</td>
+              <td class="p-2.5 font-bold text-white font-inter">📍 ${log.dept}</td>
+              <td class="p-2.5 text-teal-300 font-bold">👤 ${log.officer}</td>
+              <td class="p-2.5 text-center font-black text-emerald-400">${log.score}%</td>
+              <td class="p-2.5 text-center text-rose-300 font-bold">${log.ncrsCount} ملاحظات</td>
+            </tr>
+          `).join('');
+        }
+      }
+    }
+
+    function updateOfficerKpi(officerId, field, val) {
+      if (!officersKpis[officerId]) officersKpis[officerId] = { inspections: 0, ncrsClosed: 0, drills: 0 };
+      officersKpis[officerId][field] = Math.max(0, parseInt(val) || 0);
+      persistAllData();
+      renderKpisTable();
+    }
+
+    function deleteOfficerKpiData(officerId) {
+      officersKpis[officerId] = { inspections: 0, ncrsClosed: 0, drills: 0 };
+      persistAllData();
+      renderKpisTable();
+    }
+
+    function resetAllKpisToZero() {
+      fieldInspectors.forEach(off => { officersKpis[off.id] = { inspections: 0, ncrsClosed: 0, drills: 0 }; });
+      persistAllData();
+      renderKpisTable();
+      showToast("تم تصفير كافة المؤشرات بنجاح 🔄");
+    }
+
+    // ================= 6.5 UNIFIED PLAN =================
+    function renderUnifiedPlanView() {
+      let totalInspections = 0;
+      (weeklySchedule || []).forEach(d => {
+        totalInspections += (d.morningUnits?.length || 0) + (d.nightUnits?.length || 0);
+      });
+      const elIns = document.getElementById('unifiedCountInspections');
+      const elDrills = document.getElementById('unifiedCountDrills');
+      const elTrain = document.getElementById('unifiedCountTrainings');
+      if (elIns) elIns.textContent = totalInspections;
+      if (elDrills) elDrills.textContent = (activitiesList || []).length;
+      if (elTrain) elTrain.textContent = (trainingsList || []).length;
+
+      const insSummary = document.getElementById('unifiedInspectionsSummary');
+      if (insSummary) {
+        insSummary.innerHTML = (weeklySchedule || []).map((d, dIdx) => {
+          const dInfo = getActualDateForDayName(d.day, dIdx);
+          return `
+          <div class="card-glass p-3 rounded-xl border ${dInfo.isToday ? 'border-teal-500' : 'border-slate-700/80'} space-y-1.5 text-xs">
+            <div class="font-black text-white border-b border-slate-700 pb-1 flex items-center justify-between">
+              <span>📅 ${d.day}</span>
+              <span class="text-[10px] text-teal-300 font-mono">${dInfo.numeric}</span>
+            </div>
+            <div class="text-[11px] text-amber-300">☀️ صباحي: ${(d.morningUnits || []).map(u => `${u.location} (${u.officer})`).join(' ، ')}</div>
+            <div class="text-[11px] text-indigo-300">🌙 مسائي: ${(d.nightUnits || []).map(u => `${u.location} (${u.officer})`).join(' ، ')}</div>
+          </div>
+        `;
+        }).join('');
+      }
+
+      const drillsSummary = document.getElementById('unifiedDrillsSummary');
+      if (drillsSummary) {
+        drillsSummary.innerHTML = (activitiesList || []).map(a => `
+          <div class="card-glass p-3 rounded-xl border border-slate-700/80 flex items-center justify-between text-xs">
+            <div>
+              <div class="font-bold text-rose-300">${a.title}</div>
+              <div class="text-[11px] text-slate-300 mt-0.5">📍 ${a.dept} &bull; 👤 ${a.trainer}</div>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] font-bold text-teal-300">${a.status}</span>
+          </div>
+        `).join('');
+      }
+
+      const trainBody = document.getElementById('trainingsTableBody');
+      const canEdit = isMasterAdmin();
+      if (trainBody) {
+        if (!trainingsList || trainingsList.length === 0) {
+          trainBody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">لا توجد تدريبات مضافة حالياً.</td></tr>`;
+        } else {
+          trainBody.innerHTML = trainingsList.map((tr, idx) => `
+            <tr class="border-b border-slate-800 hover:bg-slate-800/40">
+              <td class="p-2.5 font-bold text-indigo-300">${tr.topic}</td>
+              <td class="p-2.5 font-inter font-bold text-white">📍 ${tr.dept}</td>
+              <td class="p-2.5 text-teal-300">👤 ${tr.trainer}</td>
+              <td class="p-2.5 text-center font-bold">${tr.attendees} متدرب</td>
+              <td class="p-2.5 font-mono text-slate-400">${tr.date}</td>
+              <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${tr.status.includes('تم') ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">${tr.status}</span></td>
+              <td class="p-2.5 text-center">
+                <div class="flex items-center justify-center gap-1">
+                  <button onclick="completeTrainingItem(${idx})" class="px-2 py-1 bg-emerald-700 text-white rounded text-[10px] font-bold">✓ تم التنفيذ</button>
+                  ${canEdit ? `<button onclick="deleteTrainingItem(${idx})" class="p-1 bg-rose-950 text-rose-300 rounded text-xs">🗑️</button>` : ''}
+                </div>
+              </td>
+            </tr>
+          `).join('');
+        }
+      }
+    }
+
+    function openTrainingModal() {
+      document.getElementById('trainingDeptSelect').innerHTML = buildLocationOptions(officialDepartments[0]);
+      document.getElementById('trainingTrainerSelect').innerHTML = buildOfficerOptions(fieldInspectors[0]?.name);
+      document.getElementById('trainingDateInput').value = new Date().toISOString().split('T')[0];
+      document.getElementById('trainingTopicInput').value = "";
+      document.getElementById('trainingModal').classList.remove('hidden');
+    }
+
+    function closeTrainingModal() { document.getElementById('trainingModal').classList.add('hidden'); }
+
+    function saveTrainingForm() {
+      const topic = document.getElementById('trainingTopicInput').value.trim();
+      const dept = document.getElementById('trainingDeptSelect').value;
+      const trainer = document.getElementById('trainingTrainerSelect').value;
+      const attendees = parseInt(document.getElementById('trainingAttendeesInput').value) || 10;
+      const date = document.getElementById('trainingDateInput').value;
+      if (!topic) { showToast("يرجى إدخال موضوع التدريب.", true); return; }
+      trainingsList.unshift({ id: Date.now(), topic, dept, trainer, attendees, date, status: "مجدول ⏳" });
+      persistAllData();
+      renderAllViews();
+      closeTrainingModal();
+      showToast("✅ تمت إضافة التدريب الميداني للخطة المجمعة!");
+    }
+
+    function completeTrainingItem(idx) {
+      const tr = trainingsList[idx];
+      if (!tr) return;
+      tr.status = "تم التنفيذ ✓";
+      tr.completedAt = fmtD(new Date());
+      const off = fieldInspectors.find(u => u.name === tr.trainer);
+      if (off) {
+        if (!officersKpis[off.id]) officersKpis[off.id] = { inspections: 0, ncrsClosed: 0, drills: 0 };
+        officersKpis[off.id].drills += 1;
+      }
+      persistAllData();
+      renderAllViews();
+      showToast("🎓 تم اعتماد تنفيذ التدريب وإضافته لمؤشر KPIs للمفتش!");
+    }
+
+    function deleteTrainingItem(idx) {
+      trainingsList.splice(idx, 1);
+      persistAllData();
+      renderAllViews();
+    }
+
+    // ================= 7. TEAM MANAGEMENT =================
+    function renderTeamCards() {
+      const container = document.getElementById('teamCardsGrid');
+      if (!container) return;
+      const canEdit = isMasterAdmin();
+      container.innerHTML = (activeTeam || []).map(member => `
+        <div class="card-glass p-4 rounded-xl border border-slate-700/80 flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl ${member.isManager ? 'bg-amber-600' : (member.isLeader ? 'bg-indigo-600' : 'bg-teal-600')} flex items-center justify-center text-white font-bold text-sm">${member.name.charAt(0)}</div>
+                <div>
+                  <h4 class="text-xs font-bold text-white">${member.name}</h4>
+                  <p class="text-[10px] text-teal-400 font-inter font-semibold">${member.role}</p>
+                </div>
+              </div>
+              ${canEdit ? `
+              <div class="flex items-center gap-1">
+                <button onclick="openMemberModal(${member.id})" class="px-2 py-1 bg-slate-800 text-teal-300 rounded text-[10px] font-bold">✏️ تعديل</button>
+                ${!member.isManager ? `<button onclick="handleDeleteMember(${member.id})" class="p-1 bg-rose-950 text-rose-300 rounded text-[10px]">🗑️</button>` : ''}
+              </div>` : ''}
+            </div>
+            <div class="mt-3 text-[11px] text-slate-400 font-mono" dir="ltr">📱 ${member.phone || ''}</div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
+            <span class="text-[10px] text-teal-300">مرتبط بـ KPIs والسحابة ✓</span>
+            ${member.isManager ? '<span class="px-2 py-0.5 rounded text-[9px] font-black bg-amber-500/20 text-amber-300">Owner 👑</span>' : ''}
+            ${member.isLeader ? '<span class="px-2 py-0.5 rounded text-[9px] font-black bg-indigo-500/20 text-indigo-300">Team Leader 🛡️</span>' : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateMemberInline(memberId, field, val) {
+      const m = activeTeam.find(u => String(u.id) === String(memberId));
+      if (!m) return;
+      const oldName = m.name;
+      m[field] = val;
+      if (field === 'name' && oldName !== val) {
+        (weeklySchedule || []).forEach(d => {
+          (d.morningUnits || []).forEach(u => { if (u.officer === oldName) u.officer = val; });
+          (d.nightUnits || []).forEach(u => { if (u.officer === oldName) u.officer = val; });
+        });
+      }
+      persistAllData();
+      refreshFieldInspectors();
+      renderAllViews();
+    }
+
+    function openMemberModal(memberId = -1) {
+      document.getElementById('memberEditId').value = memberId;
+      if (memberId !== -1) {
+        const m = activeTeam.find(u => String(u.id) === String(memberId));
+        if (m) {
+          document.getElementById('modalMemberName').value = m.name;
+          document.getElementById('modalMemberRole').value = m.role;
+          document.getElementById('modalMemberPhone').value = m.phone || "";
+          document.getElementById('modalMemberPass').value = "";
+          document.getElementById('modalMemberPass').placeholder = "اتركه فارغاً للإبقاء على كلمة المرور الحالية";
+        }
+      } else {
+        document.getElementById('modalMemberName').value = "";
+        document.getElementById('modalMemberRole').value = "Officer";
+        document.getElementById('modalMemberPhone').value = "2010";
+        document.getElementById('modalMemberPass').value = "123";
+        document.getElementById('modalMemberPass').placeholder = "123";
+      }
+      document.getElementById('memberModal').classList.remove('hidden');
+    }
+
+    function closeMemberModal() { document.getElementById('memberModal').classList.add('hidden'); }
+
+    function handleSaveMember() {
+      const editId = parseInt(document.getElementById('memberEditId').value);
+      const name = document.getElementById('modalMemberName').value.trim();
+      const role = document.getElementById('modalMemberRole').value.trim() || "Officer";
+      const phone = document.getElementById('modalMemberPhone').value.trim();
+      const rawPass = document.getElementById('modalMemberPass').value.trim();
+      const pass = rawPass || "123";
+      if (!name) return;
+
+      if (editId !== -1) {
+        const m = activeTeam.find(u => u.id === editId);
+        if (m) {
+          m.name = name; m.role = role; m.phone = phone;
+          if (rawPass) setStoredPassword(m.id, rawPass);   // الحقل الفارغ = إبقاء كلمة المرور كما هي
+        }
+      } else {
+        const newId = Date.now();
+        activeTeam.push({ id: newId, name, role, phone, isLeader: false, isManager: false, password: pass });
+        setStoredPassword(newId, pass);
+        officersKpis[newId] = { inspections: 0, ncrsClosed: 0, drills: 0 };
+      }
+      persistAllData();
+      refreshFieldInspectors();
+      syncKpiKeysWithTeam();
+      renderAllViews();
+      closeMemberModal();
+    }
+
+    function handleDeleteMember(id) {
+      const target = activeTeam.find(u => u.id === id);
+      if (!target || target.isManager) return;
+      activeTeam = activeTeam.filter(u => u.id !== id);
+      delete officersKpis[id];
+      persistAllData();
+      refreshFieldInspectors();
+      renderAllViews();
+    }
+
+
+    // ================= 7.5 REPORT PERIOD ENGINE (شهري / عدة شهور / أسابيع محددة / نطاق مخصص) =================
+    const AR_MONTHS = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    let reportPeriod = { mode: 'all', ranges: [], label: 'كل الفترات (تراكمي)', ncrStatus: 'all' };
+    let rpInited = false, rpMode = 'month', rpWeekSel = {}, pendingReportType = null, lastReportType = null;
+
+    function pad2(n) { return String(n).padStart(2, '0'); }
+    function fmtD(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+    function parseISO(s) { const p = String(s).slice(0, 10).split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); }
+    function fmtDM(d) { return pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1); }
+    function fmtDMY(d) { return fmtDM(d) + '/' + d.getFullYear(); }
+    function monthBounds(y, m) { return [new Date(y, m - 1, 1), new Date(y, m, 0)]; }
+    // الأسبوع من السبت إلى الجمعة
+    function weeksOfMonth(y, m) {
+      const [f, l] = monthBounds(y, m);
+      const s = new Date(f); s.setDate(s.getDate() - ((f.getDay() + 1) % 7));
+      const out = [];
+      while (s <= l) { const e = new Date(s); e.setDate(e.getDate() + 6); out.push({ s: new Date(s), e }); s.setDate(s.getDate() + 7); }
+      return out;
+    }
+
+    function periodActive() { return reportPeriod.mode !== 'all'; }
+    function inReportPeriod(dateStr) {
+      if (!periodActive()) return true;
+      if (!dateStr) return false;
+      const d = String(dateStr).slice(0, 10);
+      return reportPeriod.ranges.some(r => d >= r[0] && d <= r[1]);
+    }
+
+    // تاريخ رصد الـ NCR: السجلات القديمة بلا تاريخ تُقدَّر (المهلة − 7 أيام)
+    function ncrCreatedDate(n) {
+      if (n.createdAt) return n.createdAt;
+      if (n.dueDate) { const d = parseISO(n.dueDate); d.setDate(d.getDate() - 7); return fmtD(d); }
+      return '';
+    }
+    function logDate(l) { const t = Number(l.id); return (t && !isNaN(t)) ? fmtD(new Date(t)) : ''; }
+
+    function getReportNcrs() {
+      return (ncrList || []).filter(n => {
+        if (reportPeriod.ncrStatus === 'open' && n.status === 'Closed') return false;
+        if (reportPeriod.ncrStatus === 'closed' && n.status !== 'Closed') return false;
+        return inReportPeriod(ncrCreatedDate(n)) || inReportPeriod(n.closedAt);
+      });
+    }
+    function getReportIncidents() { return (incidentsList || []).filter(i => inReportPeriod(String(i.dateTime || '').slice(0, 10))); }
+    function getReportDrills() { return (activitiesList || []).filter(a => inReportPeriod(a.date)); }
+    function getReportTrainings() { return (trainingsList || []).filter(t => inReportPeriod(t.date)); }
+    function getReportInspectionLogs() { return (inspectionLogsList || []).filter(l => inReportPeriod(logDate(l))); }
+
+    function getReportKpi(off) {
+      if (!periodActive()) return officersKpis[off.id] || { inspections: 0, ncrsClosed: 0, drills: 0 };
+      const done = s => String(s || '').includes('تم');
+      const inspections = (inspectionLogsList || []).filter(l => l.officer === off.name && inReportPeriod(logDate(l))).length;
+      const ncrsClosed = (ncrList || []).filter(n => n.status === 'Closed' && n.responsible === off.name && inReportPeriod(n.closedAt)).length;
+      const drills = (activitiesList || []).filter(a => a.trainer === off.name && done(a.status) && inReportPeriod(a.completedAt || a.date)).length
+                   + (trainingsList || []).filter(t => t.trainer === off.name && done(t.status) && inReportPeriod(t.completedAt || t.date)).length;
+      return { inspections, ncrsClosed, drills };
+    }
+
+
+    // جدول المرور: يُطبع بنفس التوزيع الحالي بتواريخ كل أسبوع داخل الفترة (النظام لا يحفظ نسخاً قديمة من الجداول)
+    function buildScheduleSectionsHtml() {
+      if (!periodActive()) return buildTableScheduleHtml();
+      const set = {};
+      reportPeriod.ranges.forEach(r => {
+        const d = parseISO(r[0]); d.setDate(d.getDate() - ((d.getDay() + 1) % 7));
+        const end = parseISO(r[1]);
+        while (d <= end) { set[fmtD(d)] = 1; d.setDate(d.getDate() + 7); }
+      });
+      const all = Object.keys(set).sort(), keys = all.slice(0, 12);
+      const note = `<div style="font-size: 9px; color: #64748b; margin: 0 0 10px;">ملاحظة: يُطبع توزيع المفتشين والمواقع المعتمد حالياً بتواريخ كل أسبوع من الفترة المحددة؛ النظام لا يحتفظ بنسخ الجداول السابقة.${all.length > 12 ? ' (عُرض أول 12 أسبوعاً فقط)' : ''}</div>`;
+      return note + keys.map(k => {
+        const s = parseISO(k), e = new Date(s); e.setDate(e.getDate() + 6);
+        return `<h4 style="font-size: 12px; font-weight: 900; color: #0f766e; margin: 12px 0 6px;">📅 أسبوع ${fmtDM(s)} – ${fmtDMY(e)}</h4>` + buildTableScheduleHtml(s);
+      }).join('');
+    }
+
+    function buildTableNcrHtml() {
+      const missing = getReportNcrs().some(n => !n.createdAt);
+      return buildTableNcrHtmlCore() + (missing ? `<div style="font-size: 9px; color: #64748b; margin: -12px 0 16px;">* تاريخ رصد تقديري للسجلات القديمة (المهلة − 7 أيام). السجلات الجديدة تُسجَّل بتاريخها الفعلي.</div>` : '');
+    }
+    function buildTableKpisHtml() {
+      return buildTableKpisHtmlCore() + (periodActive() ? `<div style="font-size: 9px; color: #64748b; margin: -12px 0 16px;">ملاحظة: القيم محسوبة من السجلات المؤرخة خلال الفترة (الفحوصات المسجلة، الـ NCRs المغلقة، الدريلات والتدريبات المنفذة). التعديلات اليدوية على العدادات لا تدخل في تقارير الفترات المحددة.</div>` : '');
+    }
+
+    function buildPeriodSummaryHtml(type) {
+      if (type === 'weekly') return '';
+      const box = (t, v, c) => `<div style="flex: 1; min-width: 105px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 8px; text-align: center; background: #f8fafc;"><div style="font-size: 9px; color: #64748b;">${t}</div><div style="font-size: 15px; font-weight: 900; color: ${c};">${v}</div></div>`;
+      let boxes = '';
+      if (['ncr_report', 'master_comprehensive'].includes(type)) {
+        const n = getReportNcrs(); const closed = n.filter(x => x.status === 'Closed').length;
+        boxes += box('إجمالي الـ NCRs', n.length, '#be123c') + box('مفتوحة', n.length - closed, '#b45309') + box('مغلقة', closed, '#15803d') + box('نسبة الإغلاق', n.length ? Math.round(closed * 100 / n.length) + '%' : '—', '#0f766e');
+      }
+      if (['individual', 'master_comprehensive'].includes(type)) {
+        const logs = getReportInspectionLogs();
+        const avg = logs.length ? Math.round(logs.reduce((a, l) => a + (Number(l.score) || 0), 0) / logs.length) + '%' : '—';
+        boxes += box('جولات الفحص', logs.length, '#0f766e') + box('متوسط الالتزام', avg, '#0f766e');
+      }
+      if (['incidents_report', 'master_comprehensive'].includes(type)) {
+        const inc = getReportIncidents();
+        boxes += box('الحوادث والإصابات', inc.length, '#b45309') + box('أيام العمل المفقودة', inc.reduce((a, i) => a + (Number(i.lostDays) || 0), 0), '#b45309');
+      }
+      if (['drills_report', 'unified_plan_report', 'master_comprehensive'].includes(type)) {
+        const dr = getReportDrills(), tr = getReportTrainings();
+        const done = s => String(s || '').includes('تم');
+        boxes += box('الدريلات (منفذة/إجمالي)', dr.filter(a => done(a.status)).length + ' / ' + dr.length, '#1e40af') + box('التدريبات (منفذة/إجمالي)', tr.filter(t => done(t.status)).length + ' / ' + tr.length, '#4338ca');
+      }
+      return boxes ? `<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;">${boxes}</div>` : '';
+    }
+
+    // ---------- واجهة اختيار الفترة ----------
+    function mountMonthPicker(id, y, m, cb) {
+      const nowY = new Date().getFullYear();
+      let years = ''; for (let yy = 2024; yy <= Math.max(nowY + 1, y); yy++) years += `<option value="${yy}">${yy}</option>`;
+      document.getElementById(id).innerHTML =
+        `<select id="${id}_m" onchange="${cb}" class="editable-input text-xs flex-1">${AR_MONTHS.map((n, i) => `<option value="${i + 1}">${n}</option>`).join('')}</select>` +
+        `<select id="${id}_y" onchange="${cb}" class="editable-input text-xs w-24 font-inter">${years}</select>`;
+      setYM(id, y, m);
+    }
+    function setYM(id, y, m) { document.getElementById(id + '_m').value = m; document.getElementById(id + '_y').value = y; }
+    function getYM(id) { return { y: +document.getElementById(id + '_y').value, m: +document.getElementById(id + '_m').value }; }
+
+    function openReportPeriodModal(type) {
+      pendingReportType = type || null;
+      if (!rpInited) {
+        const now = new Date(), back = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+        mountMonthPicker('rpMonth', now.getFullYear(), now.getMonth() + 1, 'updateRpSummary()');
+        mountMonthPicker('rpFrom', back.getFullYear(), back.getMonth() + 1, 'updateRpSummary()');
+        mountMonthPicker('rpTo', now.getFullYear(), now.getMonth() + 1, 'updateRpSummary()');
+        mountMonthPicker('rpWeek', now.getFullYear(), now.getMonth() + 1, 'renderRpWeeks(); updateRpSummary()');
+        document.getElementById('rpCustomFrom').value = fmtD(new Date(now.getFullYear(), now.getMonth(), 1));
+        document.getElementById('rpCustomTo').value = fmtD(now);
+        rpInited = true;
+      }
+      document.getElementById('rpNcrStatus').value = reportPeriod.ncrStatus;
+      document.getElementById('rpApplyBtn').textContent = pendingReportType ? '🖨️ تطبيق الفترة وعرض التقرير' : '✓ تطبيق الفترة';
+      setRpMode(rpMode);
+      document.getElementById('reportPeriodModal').classList.remove('hidden');
+    }
+    function closeReportPeriodModal() { pendingReportType = null; document.getElementById('reportPeriodModal').classList.add('hidden'); }
+
+    function setRpMode(mode) {
+      rpMode = mode;
+      ['month', 'months', 'weeks', 'custom', 'all'].forEach(m => {
+        document.getElementById('rpPanel_' + m).classList.toggle('hidden', m !== mode);
+        const b = document.getElementById('rpTab_' + m);
+        b.className = 'py-2 rounded-lg text-[11px] font-bold transition ' + (m === mode ? 'bg-teal-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700');
+      });
+      if (mode === 'weeks') { renderRpWeeks(); renderRpChips(); }
+      updateRpSummary();
+    }
+
+    function renderRpWeeks() {
+      const { y, m } = getYM('rpWeek'); const [f, l] = monthBounds(y, m);
+      document.getElementById('rpWeeksList').innerHTML = weeksOfMonth(y, m).map((w, i) => {
+        const k = fmtD(w.s); const partial = (w.s < f || w.e > l) ? '<span class="text-[10px] text-slate-500">(يمتد خارج الشهر)</span>' : '';
+        return `<label class="flex items-center gap-2 p-2 rounded-lg bg-slate-800/70 border border-slate-700 text-xs cursor-pointer"><input type="checkbox" ${rpWeekSel[k] ? 'checked' : ''} onchange="toggleRpWeek('${k}', this.checked)" class="accent-teal-500"><span class="font-bold text-white">الأسبوع ${i + 1}</span><span class="font-inter text-slate-300" dir="ltr">${fmtDM(w.s)} → ${fmtDM(w.e)}</span>${partial}</label>`;
+      }).join('');
+    }
+    function toggleRpWeek(k, on) {
+      if (on) { const e = parseISO(k); e.setDate(e.getDate() + 6); rpWeekSel[k] = { s: k, e: fmtD(e) }; } else { delete rpWeekSel[k]; }
+      renderRpChips(); updateRpSummary();
+    }
+    function selectAllRpWeeks() {
+      const { y, m } = getYM('rpWeek');
+      weeksOfMonth(y, m).forEach(w => { const e = new Date(w.s); e.setDate(e.getDate() + 6); rpWeekSel[fmtD(w.s)] = { s: fmtD(w.s), e: fmtD(e) }; });
+      renderRpWeeks(); renderRpChips(); updateRpSummary();
+    }
+    function clearRpWeeks() { rpWeekSel = {}; renderRpWeeks(); renderRpChips(); updateRpSummary(); }
+    function removeRpWeek(k) { delete rpWeekSel[k]; renderRpWeeks(); renderRpChips(); updateRpSummary(); }
+    function renderRpChips() {
+      const keys = Object.keys(rpWeekSel).sort();
+      document.getElementById('rpWeekChips').innerHTML = keys.length ? keys.map(k => {
+        const w = rpWeekSel[k];
+        return `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-teal-900/50 border border-teal-700 text-[10px] text-teal-200 font-inter" dir="ltr">${fmtDM(parseISO(w.s))} – ${fmtDMY(parseISO(w.e))}<button onclick="removeRpWeek('${k}')" class="text-teal-300 hover:text-white bg-transparent">✕</button></span>`;
+      }).join('') : '<span class="text-[11px] text-slate-500">لم تُحدد أسابيع بعد — غيّر الشهر أعلاه لإضافة أسابيع من شهور أخرى</span>';
+    }
+
+    function computeRpPeriod() {
+      if (rpMode === 'all') return { ok: true, mode: 'all', ranges: [], label: 'كل الفترات (تراكمي)' };
+      if (rpMode === 'month') {
+        const { y, m } = getYM('rpMonth'); const [f, l] = monthBounds(y, m);
+        return { ok: true, mode: 'month', ranges: [[fmtD(f), fmtD(l)]], label: `شهر ${AR_MONTHS[m - 1]} ${y} (${fmtDMY(f)} – ${fmtDMY(l)})` };
+      }
+      if (rpMode === 'months') {
+        let a = getYM('rpFrom'), b = getYM('rpTo');
+        if (a.y * 12 + a.m > b.y * 12 + b.m) { const t = a; a = b; b = t; }
+        const f = new Date(a.y, a.m - 1, 1), l = new Date(b.y, b.m, 0); const cnt = (b.y - a.y) * 12 + b.m - a.m + 1;
+        return { ok: true, mode: 'months', ranges: [[fmtD(f), fmtD(l)]], label: `${cnt} ${cnt === 1 ? 'شهر' : 'شهور'}: من ${AR_MONTHS[a.m - 1]} ${a.y} إلى ${AR_MONTHS[b.m - 1]} ${b.y}` };
+      }
+      if (rpMode === 'weeks') {
+        const keys = Object.keys(rpWeekSel).sort();
+        if (!keys.length) return { ok: false, error: 'اختر أسبوعاً واحداً على الأقل' };
+        return { ok: true, mode: 'weeks', ranges: keys.map(k => [rpWeekSel[k].s, rpWeekSel[k].e]), label: `${keys.length} ${keys.length === 1 ? 'أسبوع' : 'أسابيع'}: ` + keys.map(k => `${fmtDM(parseISO(rpWeekSel[k].s))} – ${fmtDMY(parseISO(rpWeekSel[k].e))}`).join(' ، ') };
+      }
+      let f = document.getElementById('rpCustomFrom').value, t = document.getElementById('rpCustomTo').value;
+      if (!f || !t) return { ok: false, error: 'حدد تاريخ البداية والنهاية' };
+      if (f > t) { const x = f; f = t; t = x; }
+      return { ok: true, mode: 'custom', ranges: [[f, t]], label: `من ${fmtDMY(parseISO(f))} إلى ${fmtDMY(parseISO(t))}` };
+    }
+    function updateRpSummary() {
+      const p = computeRpPeriod();
+      const el = document.getElementById('rpSummaryText'); if (!el) return;
+      el.textContent = p.ok ? '✓ ' + p.label : '⚠️ ' + p.error;
+      el.className = 'text-[11px] font-bold p-2.5 rounded-lg ' + (p.ok ? 'bg-teal-950/60 text-teal-300' : 'bg-amber-950/60 text-amber-300');
+    }
+    function setRpPreset(kind) {
+      const now = new Date(), y = now.getFullYear(), m = now.getMonth() + 1;
+      if (kind === 'thisMonth') { setYM('rpMonth', y, m); setRpMode('month'); }
+      else if (kind === 'lastMonth') { const d = new Date(y, m - 2, 1); setYM('rpMonth', d.getFullYear(), d.getMonth() + 1); setRpMode('month'); }
+      else if (kind === 'last3') { const d = new Date(y, m - 3, 1); setYM('rpFrom', d.getFullYear(), d.getMonth() + 1); setYM('rpTo', y, m); setRpMode('months'); }
+      else if (kind === 'thisYear') { setYM('rpFrom', y, 1); setYM('rpTo', y, m); setRpMode('months'); }
+      else if (kind === 'last4w') { const d = new Date(now); d.setDate(d.getDate() - 27); document.getElementById('rpCustomFrom').value = fmtD(d); document.getElementById('rpCustomTo').value = fmtD(now); setRpMode('custom'); }
+    }
+    function updatePeriodBadge() {
+      const el = document.getElementById('reportPeriodBadge'); if (el) el.textContent = reportPeriod.label + (reportPeriod.ncrStatus !== 'all' ? (reportPeriod.ncrStatus === 'open' ? ' | NCRs مفتوحة فقط' : ' | NCRs مغلقة فقط') : '');
+    }
+    function applyReportPeriod() {
+      const p = computeRpPeriod();
+      if (!p.ok) { showToast(p.error, true); return; }
+      reportPeriod = { mode: p.mode, ranges: p.ranges, label: p.label, ncrStatus: document.getElementById('rpNcrStatus').value };
+      updatePeriodBadge();
+      const t = pendingReportType; closeReportPeriodModal();
+      if (t) renderReportPreview(t); else showToast('📅 تم تحديد فترة التقارير');
+    }
+    // نقطة الدخول: كل أزرار الطباعة الحالية تمر من هنا (جدول المرور الأسبوعي لا يحتاج فترة)
+    function generateAndOpenReportPreview(type = 'weekly') {
+            openReportPeriodModal(type);
+    }
+
+    // ================= 8. PRINTABLE REPORTS ENGINE =================
+    function buildTableScheduleHtml(baseDate = null) {
+      const rows = (weeklySchedule || []).map((item, idx) => {
+        const dInfo = getActualDateForDayName(item.day, idx, baseDate);
+        return `
+        <tr style="border-bottom: 1px solid #cbd5e1;">
+          <td style="padding: 7px; font-weight: bold; background: #f8fafc; border: 1px solid #cbd5e1; text-align: center;">
+            <div>${item.day || ''}</div>
+            <div style="font-size: 9px; color: #0f766e; font-weight: normal;">${dInfo.formattedAr} (${dInfo.numeric})</div>
+          </td>
+          <td style="padding: 7px; border: 1px solid #cbd5e1;">${(item.morningUnits || []).map(u => `<b>${u.location}</b> (${u.officer})`).join(' &bull; ')}</td>
+          <td style="padding: 7px; border: 1px solid #cbd5e1;">${(item.nightUnits || []).map(u => `<b>${u.location}</b> (${u.officer})`).join(' &bull; ')}</td>
+        </tr>
+      `;
+      }).join('');
+      return `<table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;"><thead><tr style="background: #0f766e; color: #ffffff;"><th style="padding: 8px; border: 1px solid #0f766e; width: 18%; text-align: center;">اليوم والتاريخ الفعلي</th><th style="padding: 8px; border: 1px solid #0f766e; width: 41%;">☀️ الشفت الصباحي</th><th style="padding: 8px; border: 1px solid #0f766e; width: 41%;">🌙 الشفت المسائي</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+
+    function buildTableNcrHtmlCore() {
+      const rows = getReportNcrs().map(ncr => `
+        <tr style="border-bottom: 1px solid #cbd5e1;">
+          <td style="padding: 6px; border: 1px solid #cbd5e1; font-weight: bold;">${ncr.id}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; font-weight: bold;">${ncr.dept}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${ncr.desc}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${ncr.photo ? `<img src="${ncr.photo}" style="width:45px;height:45px;object-fit:cover;">` : '-'}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${ncr.risk}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${ncr.responsible}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${ncr.dueDate}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${ncr.createdAt || (ncrCreatedDate(ncr) ? ncrCreatedDate(ncr) + '*' : '-')}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${ncr.closedAt || '-'}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold;">${ncr.status}</td>
+        </tr>
+      `).join('') || `<tr><td colspan="10" style="padding: 12px; text-align: center; border: 1px solid #cbd5e1;">لا توجد حالات عدم مطابقة مسجلة في هذه الفترة</td></tr>`;
+      return `<table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;"><thead><tr style="background: #be123c; color: #ffffff;"><th style="padding: 8px; border: 1px solid #be123c;">رقم NCR</th><th style="padding: 8px; border: 1px solid #be123c;">القسم</th><th style="padding: 8px; border: 1px solid #be123c;">وصف عدم المطابقة</th><th style="padding: 8px; border: 1px solid #be123c;">الصورة</th><th style="padding: 8px; border: 1px solid #be123c;">الخطورة</th><th style="padding: 8px; border: 1px solid #be123c;">المسؤول</th><th style="padding: 8px; border: 1px solid #be123c;">المهلة</th><th style="padding: 8px; border: 1px solid #be123c;">تاريخ الرصد</th><th style="padding: 8px; border: 1px solid #be123c;">تاريخ الإغلاق</th><th style="padding: 8px; border: 1px solid #be123c;">الحالة</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+
+    function buildTableIncidentsHtml() {
+      const rows = getReportIncidents().map(inc => `
+        <tr style="border-bottom: 1px solid #cbd5e1;">
+          <td style="padding: 6px; border: 1px solid #cbd5e1; font-weight: bold;">${inc.id}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${inc.dateTime}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;"><b>${inc.person}</b> (${inc.job})</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${inc.type}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${inc.location}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${inc.photo ? `<img src="${inc.photo}" style="width:45px;height:45px;object-fit:cover;">` : '-'}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold;">${inc.lostDays} يوم</td>
+        </tr>
+      `).join('') || `<tr><td colspan="7" style="padding: 12px; text-align: center; border: 1px solid #cbd5e1; color: #15803d; font-weight: bold;">🛡️ سجل خالي من الحوادث والإصابات (Zero Accidents)</td></tr>`;
+      return `<table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;"><thead><tr style="background: #b45309; color: #ffffff;"><th style="padding: 8px; border: 1px solid #b45309;">رقم الحادث</th><th style="padding: 8px; border: 1px solid #b45309;">التاريخ والوقت</th><th style="padding: 8px; border: 1px solid #b45309;">المصاب / الوظيفة</th><th style="padding: 8px; border: 1px solid #b45309;">نوع الإصابة</th><th style="padding: 8px; border: 1px solid #b45309;">الموقع</th><th style="padding: 8px; border: 1px solid #b45309;">الصورة</th><th style="padding: 8px; border: 1px solid #b45309;">أيام الغياب</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+
+    function buildTableKpisHtmlCore() {
+      const rows = (fieldInspectors || []).map((off, idx) => {
+        const kpi = getReportKpi(off);
+        const score = calculateOfficerCompliance(kpi);
+        return `
+          <tr style="border-bottom: 1px solid #cbd5e1;">
+            <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${idx + 1}</td>
+            <td style="padding: 6px; border: 1px solid #cbd5e1; font-weight: bold;">${off.name}</td>
+            <td style="padding: 6px; border: 1px solid #cbd5e1;">${off.role}</td>
+            <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold;">${kpi.inspections}</td>
+            <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold;">${kpi.ncrsClosed}</td>
+            <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold;">${kpi.drills}</td>
+            <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold; color: #0f766e;">${score}%</td>
+          </tr>
+        `;
+      }).join('');
+      return `<table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;"><thead><tr style="background: #0f766e; color: #ffffff;"><th style="padding: 8px; border: 1px solid #0f766e; text-align: center;">م</th><th style="padding: 8px; border: 1px solid #0f766e;">اسم المفتش</th><th style="padding: 8px; border: 1px solid #0f766e;">المسمى الوظيفي</th><th style="padding: 8px; border: 1px solid #0f766e; text-align: center;">جولات منجزة</th><th style="padding: 8px; border: 1px solid #0f766e; text-align: center;">NCRs مغلقة</th><th style="padding: 8px; border: 1px solid #0f766e; text-align: center;">دريلات وتدريب</th><th style="padding: 8px; border: 1px solid #0f766e; text-align: center;">نسبة الامتثال</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+
+    function buildTableDrillsHtml() {
+      const rows = getReportDrills().map(a => `
+        <tr style="border-bottom: 1px solid #cbd5e1;">
+          <td style="padding: 6px; border: 1px solid #cbd5e1; font-weight: bold;">${a.title}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${a.dept}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${a.trainer}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${a.date}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold;">${a.status}</td>
+        </tr>
+      `).join('');
+      return `<table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;"><thead><tr style="background: #1e40af; color: #ffffff;"><th style="padding: 8px; border: 1px solid #1e40af;">كود الطوارئ / الدريل</th><th style="padding: 8px; border: 1px solid #1e40af;">القسم</th><th style="padding: 8px; border: 1px solid #1e40af;">المكلف بالتنفيذ</th><th style="padding: 8px; border: 1px solid #1e40af; text-align: center;">التاريخ</th><th style="padding: 8px; border: 1px solid #1e40af; text-align: center;">الحالة</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+
+    function buildTableTrainingsHtml() {
+      const rows = getReportTrainings().map(tr => `
+        <tr style="border-bottom: 1px solid #cbd5e1;">
+          <td style="padding: 6px; border: 1px solid #cbd5e1; font-weight: bold;">${tr.topic}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${tr.dept}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${tr.trainer}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${tr.attendees}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${tr.date}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold;">${tr.status}</td>
+        </tr>
+      `).join('') || `<tr><td colspan="6" style="padding: 10px; text-align: center; border: 1px solid #cbd5e1;">لا توجد تدريبات مسجلة</td></tr>`;
+      return `<table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;"><thead><tr style="background: #4338ca; color: #fff;"><th style="padding: 8px; border: 1px solid #4338ca;">موضوع التدريب</th><th style="padding: 8px; border: 1px solid #4338ca;">القسم</th><th style="padding: 8px; border: 1px solid #4338ca;">المدرب</th><th style="padding: 8px; border: 1px solid #4338ca; text-align: center;">المتدربين</th><th style="padding: 8px; border: 1px solid #4338ca; text-align: center;">التاريخ</th><th style="padding: 8px; border: 1px solid #4338ca; text-align: center;">الحالة</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+
+    function buildTableInspectionLogsHtml() {
+      const rows = getReportInspectionLogs().map(l => `
+        <tr style="border-bottom: 1px solid #cbd5e1;">
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${l.dateTime}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; font-weight: bold;">${l.dept}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1;">${l.officer}</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold; color: #0f766e;">${l.score}%</td>
+          <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">${l.ncrsCount}</td>
+        </tr>
+      `).join('') || `<tr><td colspan="5" style="padding: 10px; text-align: center; border: 1px solid #cbd5e1;">لم تُسجل جولات فحص بعد</td></tr>`;
+      return `<table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; margin-bottom: 20px;"><thead><tr style="background: #0d9488; color: #fff;"><th style="padding: 8px; border: 1px solid #0d9488;">التاريخ والوقت</th><th style="padding: 8px; border: 1px solid #0d9488;">القسم</th><th style="padding: 8px; border: 1px solid #0d9488;">المفتش</th><th style="padding: 8px; border: 1px solid #0d9488; text-align: center;">نسبة الامتثال</th><th style="padding: 8px; border: 1px solid #0d9488; text-align: center;">ملاحظات مرصودة</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+
+    function renderReportPreview(type = 'weekly') {
+      const container = document.getElementById('printPreviewContent');
+      const nowStr = new Intl.DateTimeFormat('ar-EG', { dateStyle: 'full' }).format(new Date());
+
+      let reportTitle = "التقرير الرسمي المعتمد";
+      let bodyHtml = "";
+      lastReportType = type;
+      const _hasNcr = ['ncr_report', 'master_comprehensive'].includes(type);
+      const periodLineHtml = `<div style="font-size: 11px; font-weight: bold; color: #0f766e; margin-top: 5px;">📅 فترة التقرير: ${reportPeriod.label}${(_hasNcr && reportPeriod.ncrStatus !== 'all') ? ' &nbsp;|&nbsp; الـ NCRs: ' + (reportPeriod.ncrStatus === 'open' ? 'المفتوحة فقط' : 'المغلقة فقط') : ''}</div>`;
+      const summaryHtml = buildPeriodSummaryHtml(type);
+
+      if (type === 'weekly') {
+        reportTitle = "التقرير الأسبوعي لخطط المرور الميداني والورديات (12 ساعة)";
+        bodyHtml = buildScheduleSectionsHtml();
+      } else if (type === 'unified_plan_report') {
+        reportTitle = "تقرير الخطة التنفيذية المجمعة (الفحوصات + الدريلات + التدريب الميداني)";
+        bodyHtml = `
+          <h4 style="font-size: 12px; font-weight: 900; color: #0f766e; margin: 10px 0 6px;">أولاً: جدول خطة المرور والتفتيش الميداني الأسبوعي:</h4>
+          ${buildScheduleSectionsHtml()}
+          <h4 style="font-size: 12px; font-weight: 900; color: #1e40af; margin: 15px 0 6px;">ثانياً: خطة أكواد الطوارئ والدريلات (Drills):</h4>
+          ${buildTableDrillsHtml()}
+          <h4 style="font-size: 12px; font-weight: 900; color: #4338ca; margin: 15px 0 6px;">ثالثاً: خطة التدريبات الميدانية المطلوبة (Trainings):</h4>
+          ${buildTableTrainingsHtml()}
+        `;
+      } else if (type === 'ncr_report') {
+        reportTitle = "تقرير سجل حالات عدم المطابقة والملاحظات الميدانية (NCRs Report)";
+        bodyHtml = buildTableNcrHtml();
+      } else if (type === 'incidents_report') {
+        reportTitle = "تقرير سجل حوادث وإصابات بيئة العمل (Zero Accidents Log Report)";
+        bodyHtml = buildTableIncidentsHtml();
+      } else if (type === 'individual') {
+        reportTitle = "تقرير مصفوفة تقييم مؤشرات أداء المفتشين وسجل الفحوصات المنفذة (KPIs)";
+        bodyHtml = `
+          <h4 style="font-size: 12px; font-weight: 900; color: #0f766e; margin: 10px 0 6px;">أولاً: مصفوفة تقييم أداء المفتشين (KPIs Matrix):</h4>
+          ${buildTableKpisHtml()}
+          <h4 style="font-size: 12px; font-weight: 900; color: #0d9488; margin: 15px 0 6px;">ثانياً: سجل نتائج الفحوصات الميدانية الفعلية المنفذة:</h4>
+          ${buildTableInspectionLogsHtml()}
+        `;
+      } else if (type === 'drills_report') {
+        reportTitle = "تقرير الخطة الشهرية لأكواد الطوارئ والدريلات والتدريب الميداني";
+        bodyHtml = buildTableDrillsHtml() + `<h4 style="font-size: 12px; font-weight: 900; color: #4338ca; margin: 15px 0 6px;">التدريبات الميدانية المنفذة والمجدولة:</h4>` + buildTableTrainingsHtml();
+      } else {
+        reportTitle = "التقرير التنفيذي الشامل العام لإدارة السلامة والصحة المهنية (Master Report)";
+        bodyHtml = `
+          <h4 style="font-size: 12px; font-weight: 900; color: #0f766e; margin: 10px 0 6px;">أولاً: جدول خطة المرور الأسبوعي:</h4>
+          ${buildScheduleSectionsHtml()}
+          <h4 style="font-size: 12px; font-weight: 900; color: #0f766e; margin: 15px 0 6px;">ثانياً: مصفوفة تقييم أداء المفتشين (KPIs) وسجل الفحوصات:</h4>
+          ${buildTableKpisHtml()}
+          ${buildTableInspectionLogsHtml()}
+          <h4 style="font-size: 12px; font-weight: 900; color: #be123c; margin: 15px 0 6px;">ثالثاً: سجل تقارير عدم المطابقة (NCRs Tracker):</h4>
+          ${buildTableNcrHtml()}
+          <h4 style="font-size: 12px; font-weight: 900; color: #b45309; margin: 15px 0 6px;">رابعاً: سجل الحوادث والإصابات (Work Incidents Log):</h4>
+          ${buildTableIncidentsHtml()}
+          <h4 style="font-size: 12px; font-weight: 900; color: #1e40af; margin: 15px 0 6px;">خامساً: خطة أكواد الطوارئ والدريلات والتدريب:</h4>
+          ${buildTableDrillsHtml()}
+          ${buildTableTrainingsHtml()}
+        `;
+      }
+
+      container.innerHTML = `
+        <div style="direction: rtl; color: #000; padding: 5px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0f766e; padding-bottom: 12px; margin-bottom: 16px;">
+            <div>
+              <h2 style="font-size: 16px; font-weight: 900; color: #0f766e; margin: 0;">مستشفى الناس للأطفال (Al Nas Hospital)</h2>
+              <div style="font-size: 12px; font-weight: bold; color: #1e293b; margin-top: 3px;">إدارة السلامة والصحة المهنية والبيئة (OHS & Environment Dept)</div>
+              <div style="font-size: 10px; color: #64748b;">المرجعية القياسية: معايير GAHAR 2025 / NFPA / ISO 45001</div>
+            </div>
+            <div style="font-size: 11px; text-align: left; color: #64748b;">
+              <div>تاريخ الإصدار: <b>${nowStr}</b></div>
+              <div>حالة التوثيق: <b>Firebase Live Sync ✓</b></div>
+            </div>
+          </div>
+          <div style="text-align: center; margin-bottom: 15px; background: #f1f5f9; padding: 8px; border-radius: 6px;">
+            <h3 style="font-size: 14px; font-weight: 900; color: #0f172a; margin: 0;">${reportTitle}</h3>
+            ${periodLineHtml}
+          </div>
+          ${summaryHtml}
+          <div>${bodyHtml}</div>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 30px; padding-top: 15px; border-top: 2px solid #0f766e; text-align: center; font-size: 11px;">
+            <div style="border: 1px dashed #cbd5e1; padding: 10px; border-radius: 6px; background: #fafafa;">
+              <div style="font-weight: 900; color: #0f172a;">م/ أحمد نبيه</div>
+              <div style="font-size: 10px; color: #0f766e; font-weight: bold;">Team Leader السلامة</div>
+              <div style="margin-top: 25px; border-bottom: 1px solid #94a3b8; width: 80%; margin: 20px auto 4px;"></div>
+              <div style="font-size: 9px; color: #94a3b8;">التوقيع والاعتماد</div>
+            </div>
+            <div style="border: 1px dashed #cbd5e1; padding: 10px; border-radius: 6px; background: #fafafa;">
+              <div style="font-weight: 900; color: #0f172a;">م/ عمر فريد العزب</div>
+              <div style="font-size: 10px; color: #0f766e; font-weight: bold;">مدير إدارة السلامة والصحة المهنية</div>
+              <div style="margin-top: 25px; border-bottom: 1px solid #94a3b8; width: 80%; margin: 20px auto 4px;"></div>
+              <div style="font-size: 9px; color: #94a3b8;">التوقيع والاعتماد</div>
+            </div>
+            <div style="border: 1px dashed #cbd5e1; padding: 10px; border-radius: 6px; background: #fafafa;">
+              <div style="font-weight: 900; color: #0f172a;">مدير التشغيل</div>
+              <div style="font-size: 10px; color: #64748b; font-weight: bold;">Operations Director</div>
+              <div style="margin-top: 25px; border-bottom: 1px solid #94a3b8; width: 80%; margin: 20px auto 4px;"></div>
+              <div style="font-size: 9px; color: #94a3b8;">التوقيع والاعتماد</div>
+            </div>
+            <div style="border: 1px dashed #cbd5e1; padding: 10px; border-radius: 6px; background: #fafafa;">
+              <div style="font-weight: 900; color: #0f172a;">مدير عام المستشفى</div>
+              <div style="font-size: 10px; color: #64748b; font-weight: bold;">General Director / CEO</div>
+              <div style="margin-top: 25px; border-bottom: 1px solid #94a3b8; width: 80%; margin: 20px auto 4px;"></div>
+              <div style="font-size: 9px; color: #94a3b8;">الاعتماد والختم الرسمي</div>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('printPreviewModal').classList.remove('hidden');
+    }
+
+    function executeSmartPrint() {
+      const content = document.getElementById('printPreviewContent').innerHTML;
+      const printWindow = window.open('', '_blank', 'width=1000,height=800');
+      if (printWindow) {
+        printWindow.document.open();
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html lang="ar" dir="rtl">
+          <head>
+            <meta charset="UTF-8">
+            <title>طباعة تقرير رسمي - مستشفى الناس للأطفال</title>
+            <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+            <style>
+              * { font-family: 'Cairo', sans-serif; box-sizing: border-box; }
+              body { background: #fff; color: #000; margin: 15mm; direction: rtl; }
+              table { width: 100%; border-collapse: collapse; page-break-inside: auto; }
+              tr { page-break-inside: avoid; page-break-after: auto; }
+              @media print {
+                body { margin: 8mm; }
+                .no-print-bar { display: none !important; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="no-print-bar" style="background:#f1f5f9;padding:10px;margin-bottom:15px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid #cbd5e1;">
+              <span style="font-size:12px;font-weight:bold;color:#0f766e;">🖨️ نافذة الطباعة المباشرة جاهزة</span>
+              <button onclick="window.print()" style="background:#0f766e;color:#fff;border:none;padding:8px 18px;border-radius:6px;font-weight:bold;cursor:pointer;">🖨️ اضغط هنا للطباعة الآن</button>
+            </div>
+            ${content}
+            <script>window.onload = function() { setTimeout(function() { window.focus(); window.print(); }, 350); };<\/script>
+          </body>
+          </html>
+        `);
+        printWindow.document.close();
+      } else {
+        window.print();
+      }
+    }
+
+    function downloadDirectPdfReport() {
+      const element = document.getElementById('printPreviewContent');
+      const btn = document.getElementById('btnDownloadPdf');
+      if (!element) return;
+
+      if (typeof html2pdf !== 'undefined') {
+        if (btn) btn.textContent = "⏳ جاري تجهيز الـ PDF...";
+        const opt = {
+          margin: [8, 8, 8, 8],
+          filename: 'تقرير_السلامة_مستشفى_الناس_' + new Date().toISOString().slice(0,10) + '.pdf',
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, logging: false },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save().then(() => {
+          if (btn) btn.innerHTML = "<span>📥 تحميل ملف PDF مباشر</span>";
+          showToast("✅ تم تحميل ملف الـ PDF بنجاح!");
+        }).catch(() => {
+          if (btn) btn.innerHTML = "<span>📥 تحميل ملف PDF مباشر</span>";
+          executeSmartPrint();
+        });
+      } else {
+        executeSmartPrint();
+      }
+    }
+
+    function downloadPrintableHtmlReport() {
+      const content = document.getElementById('printPreviewContent').innerHTML;
+      const fullHtml = `<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>تقرير السلامة والصحة المهنية - مستشفى الناس</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet"><style>*{font-family:'Cairo',sans-serif;box-sizing:border-box;}body{background:#fff;color:#000;margin:15mm;direction:rtl;}@media print{.no-print{display:none!important;}}</style></head><body><div class="no-print" style="margin-bottom:15px;padding:10px;background:#f8fafc;border:1px solid #cbd5e1;text-align:center;"><button onclick="window.print()" style="background:#0f766e;color:#fff;padding:10px 25px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:14px;">🖨️ طباعة التقرير الآن أو حفظه كـ PDF</button></div>${content}<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script></body></html>`;
+      const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'تقرير_رسمي_مستشفى_الناس_' + new Date().toISOString().slice(0,10) + '.html';
+      a.click();
+      showToast("📄 تم تنزيل نسخة التقرير الجاهزة للطباعة!");
+    }
+
+    // ================= 9. SECURE SESSION & LOGIN AUTH =================
+    function populateLoginUsers() {
+      const select = document.getElementById('loginUserSelect');
+      if (!select) return;
+      select.innerHTML = (activeTeam || []).map(u => `<option value="${u.id}">${u.name} - (${u.role}${u.isManager ? ' 👑' : ''})</option>`).join('');
+    }
+
+    function togglePasswordVisibility(id) {
+      const inp = document.getElementById(id);
+      if (inp) inp.type = inp.type === 'password' ? 'text' : 'password';
+    }
+
+    function handleLoginSubmit() {
+      const userId = parseInt(document.getElementById('loginUserSelect').value);
+      const pass = document.getElementById('loginPasswordInput').value.trim();
+      const user = activeTeam.find(u => u.id === userId);
+      if (!user) return;
+      const storedPw = getStoredPassword(user.id);
+      if (!verifyPassword(pass, storedPw)) {
+        showToast("كلمة المرور غير صحيحة", true);
+        return;
+      }
+      if (!isHashedPassword(storedPw)) {          // ترقية تلقائية للنص العادي القديم إلى hash
+        setStoredPassword(user.id, pass);
+        migrateAllPasswordsToHashed();
+        persistAllData();
+      }
+      currentUser = user;
+      localStorage.setItem(STORAGE_KEY_LOGGED_USER, String(user.id));
+      document.getElementById('loginOverlay').classList.add('hidden');
+      applyUserPermissions();
+      showToast(`أهلاً بك: ${user.name}`);
+    }
+
+    function handleUserLogout() {
+      currentUser = null;
+      localStorage.removeItem(STORAGE_KEY_LOGGED_USER);
+      localStorage.removeItem('firebase:session::alnas_safety_master_data');
+      
+      document.getElementById('loginPasswordInput').value = '';
+      document.getElementById('loginOverlay').classList.remove('hidden');
+      showToast("تم تسجيل الخروج بنجاح وتأمين الجلسة 🔒");
+    }
+
+    function applyUserPermissions() {
+      if (!currentUser) return;
+      document.getElementById('loggedUserName').textContent = currentUser.name;
+      document.getElementById('userAvatarChar').textContent = currentUser.name.charAt(0);
+      const canEdit = isMasterAdmin();
+      document.getElementById('loggedUserRoleBadge').textContent = canEdit ? "Owner / صلاحية كاملة 👑" : currentUser.role;
+      document.querySelectorAll('.owner-only').forEach(el => {
+        el.style.display = canEdit ? '' : 'none';
+      });
+      renderAllViews();
+    }
+
+    function openPasswordChangeModal() { document.getElementById('passwordChangeModal').classList.remove('hidden'); }
+    function closePasswordChangeModal() { document.getElementById('passwordChangeModal').classList.add('hidden'); }
+
+    function handlePasswordChange() {
+      const p1 = document.getElementById('modalNewPasswordInput').value.trim();
+      const p2 = document.getElementById('modalConfirmPasswordInput').value.trim();
+      if (!p1 || p1 !== p2) { showToast("كلمات المرور غير متطابقة", true); return; }
+      setStoredPassword(currentUser.id, p1);
+      persistAllData();
+      closePasswordChangeModal();
+      showToast("🔒 تم حفظ كلمة المرور الجديدة في السحابة!");
+    }
+
+    function exportScheduleToCsv() {
+      let csv = "\uFEFFاليوم,التاريخ الموافق,الشفت,الموقع,المكلف\n";
+      (weeklySchedule || []).forEach((d, idx) => {
+        const dInfo = getActualDateForDayName(d.day, idx);
+        (d.morningUnits || []).forEach(u => { csv += `"${d.day}","${dInfo.numeric}","صباحي","${u.location}","${u.officer}"\n`; });
+        (d.nightUnits || []).forEach(u => { csv += `"${d.day}","${dInfo.numeric}","مسائي","${u.location}","${u.officer}"\n`; });
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "خطة_المرور_الأسبوعي_مستشفى_الناس.csv";
+      a.click();
+    }
+
+    function renderAllViews() {
+      renderWeeklySchedule();
+      renderUnifiedPlanView();
+      renderChecklistsGrid();
+      renderKpisTable();
+      renderActivitiesTable();
+      renderNcrTable();
+      renderIncidentsTable();
+      renderTeamCards();
+      populateLoginUsers();
+    }
+
+    window.onload = function() {
+      refreshFieldInspectors();
+      syncKpiKeysWithTeam();
+      updateCairoTimeAndCalendar();
+      setInterval(updateCairoTimeAndCalendar, 1000);
+      populateLoginUsers();
+
+      const savedUserId = localStorage.getItem(STORAGE_KEY_LOGGED_USER);
+      if (savedUserId) {
+        const found = activeTeam.find(u => String(u.id) === String(savedUserId));
+        if (found) {
+          currentUser = found;
+          document.getElementById('loginOverlay').classList.add('hidden');
+          applyUserPermissions();
+          return;
+        }
+      }
+
+      currentUser = null;
+      document.getElementById('loginOverlay').classList.remove('hidden');
+    };
+
+    async function submitInspection(inspectionData) {
+      const db = firebase.firestore();
+      const batch = db.batch();
+
+      try {
+        const inspectionRef = db.collection('inspections').doc();
+        const inspectionId = inspectionRef.id;
+
+        let hasNonCompliance = false;
+        let nonCompliantItems = [];
+
+        inspectionData.items.forEach(item => {
+            if (item.status === 'non-compliant') {
+                hasNonCompliance = true;
+                nonCompliantItems.push(item);
+            }
+        });
+
+        const inspectionPayload = {
+            inspectionId: inspectionId,
+            zoneId: inspectionData.zoneId,
+            inspectorId: inspectionData.inspectorId,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            items: inspectionData.items,
+            overallStatus: hasNonCompliance ? 'Action Required' : 'Compliant'
+        };
+
+        batch.set(inspectionRef, inspectionPayload);
+
+        if (hasNonCompliance) {
+            const ncrRef = db.collection('ncrs').doc();
+            const ncrPayload = {
+                ncrId: ncrRef.id,
+                inspectionId: inspectionId,
+                zoneId: inspectionData.zoneId,
+                reportedBy: inspectionData.inspectorId,
+                violations: nonCompliantItems,
+                status: 'Open',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                assignedTo: inspectionData.assignedTechnician || 'Unassigned'
+            };
+            batch.set(ncrRef, ncrPayload);
+
+            const zoneRef = db.collection('zones').doc(inspectionData.zoneId);
+            batch.update(zoneRef, { 
+                currentStatus: 'Action Required',
+                lastInspected: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } else {
+            const zoneRef = db.collection('zones').doc(inspectionData.zoneId);
+            batch.update(zoneRef, { 
+                currentStatus: 'Safe',
+                lastInspected: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+
+        await batch.commit();
+        return { success: true, inspectionId };
+
+      } catch (error) {
+          console.error("خطأ أثناء حفظ الفحص:", error);
+          return { success: false, error: error.message };
+      }
+    }
+  </script>
+</body>
+</html>
